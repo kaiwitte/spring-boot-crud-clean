@@ -31,7 +31,7 @@ dependencies {
 
 openApiGenerate {
     generatorName.set("spring")
-    inputSpec.set("$rootDir/src/main/resources/cruddemo.yaml")
+    inputSpec.set(file("src/main/resources/cruddemo.yaml").toURI().toString())
     outputDir.set(layout.buildDirectory.dir("generated").get().asFile.absolutePath)
     apiPackage.set("com.witteconsulting.cruddemo.api")
     modelPackage.set("com.witteconsulting.cruddemo.model")
@@ -75,4 +75,8 @@ tasks.withType<Test> {
         showStandardStreams = true
         events("passed", "skipped", "failed")
     }
+}
+
+springBoot {
+    mainClass.set("com.witteconsulting.cruddemo.CruddemoApplication")
 }

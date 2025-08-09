@@ -1,6 +1,6 @@
 package com.witteconsulting.cruddemo;
 
-import com.witteconsulting.cruddemo.model.Hello200ResponseDto;
+import com.witteconsulting.cruddemo.model.HelloResponseDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,9 +18,9 @@ class HelloServiceIntegrationTest {
 
     @Test
     void shouldRespondWithGreeting() {
-        final ResponseEntity<Hello200ResponseDto> response = restTemplate.getForEntity(
+        final ResponseEntity<HelloResponseDto> response = restTemplate.getForEntity(
                 "/hello",
-                Hello200ResponseDto.class
+                HelloResponseDto.class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
