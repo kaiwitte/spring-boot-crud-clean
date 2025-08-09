@@ -18,8 +18,8 @@ class HelloServiceIntegrationTest {
 
     @Test
     void shouldRespondWithGreeting() {
-        ResponseEntity<Hello200ResponseDto> response = restTemplate.getForEntity(
-                "/hello", 
+        final ResponseEntity<Hello200ResponseDto> response = restTemplate.getForEntity(
+                "/hello",
                 Hello200ResponseDto.class
         );
 
