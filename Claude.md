@@ -9,6 +9,10 @@ This is a CRUD project with the following purposes:
 - Practice and try out a very conservative approach to AI tools such as
   Claude, GitHub Copilot and Cursor.
 
+## Code style
+
+- all local variables final
+
 ## Architeture, methods and technologies
 
 - OpenAPI generator
@@ -63,7 +67,7 @@ This is a CRUD project with the following purposes:
                           type: array
                           items:
                             $ref: '#/components/schemas/[Entityname]Response'
-        /[entityname]/{[entityname]Id}:
+        /[entitynamePlural]/{[entityname]Id}:
           parameters:
             - $ref: "#/components/parameters/[Entityname]Id"
           get:
