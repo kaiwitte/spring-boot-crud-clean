@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class HelloServiceIntegrationTest {
+class HelloServiceIT {
 
     @Autowired
     private TestRestTemplate restTemplate;

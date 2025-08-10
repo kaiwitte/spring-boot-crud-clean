@@ -14,12 +14,158 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HelloResponse'
+  /rooms:
+    post:
+      tags:
+        - room
+      summary: Add Room
+      operationId: newRoom
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomRequest'
+      responses:
+        "201":
+          description: Created
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URI of the created Room
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomResponse'
+        '400':
+          description: Error in the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      tags:
+        - room
+      summary: Retrieve all Rooms
+      operationId: listRoom
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - results
+                results:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RoomResponse'
+  /room/{roomId}:
+    parameters:
+      - $ref: "#/components/parameters/IdParam"
+    get:
+      tags:
+        - room
+      summary: Retrieve Room
+      operationId: getRoom
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomResponse'
+        "404":
+          description: No Room found with this RoomId
+    put:
+      tags:
+        - room
+      summary: Update Room
+      operationId: updateRoom
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomRequest'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomResponse'
+        '400':
+          description: Error in the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: No Room found with this RoomId
+    delete:
+      tags:
+        - room
+      summary: Delete Room
+      operationId: deleteRoom
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Error in the request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: No Room found with this RoomId
 components:
+  parameters:
+    IdParam:
+      name: roomId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
   schemas:
     HelloResponse:
       type: object
       properties:
         message:
           type: string
+      required:
+        - message
+    Room:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: unique ID. Ignored in requests, required in responses
+        name:
+          type: string
+      required:
+        - name
+    RoomRequest:
+      allOf:
+        - $ref: '#/components/schemas/Room'
+    RoomResponse:
+      allOf:
+        - $ref: '#/components/schemas/Room'
+      required:
+        - id
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
       required:
         - message

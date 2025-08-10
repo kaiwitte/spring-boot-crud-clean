@@ -47,7 +47,7 @@ This is a CRUD project with the following purposes:
           get:
             tags:
               - [entityname]
-            summary: Retrieve all [Entityname]
+            summary: Retrieve all [EntitynamePlural]
             operationId: list[Entityname]
             responses:
               "200":
@@ -59,10 +59,6 @@ This is a CRUD project with the following purposes:
                       required:
                         - results
                       properties:
-                        pagination:
-                          $ref: "#/components/schemas/Pagination"
-                        sort:
-                          $ref: "#/components/schemas/Sort"
                         results:
                           type: array
                           items:
@@ -126,7 +122,26 @@ This is a CRUD project with the following purposes:
                       $ref: "#/components/schemas/ErrorResponse"
               "404":
                 description: No [Entityname] found with this [Entityname]Id
-      
+        [Entityname]:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              description: unique ID. Ignored in requests, required in responses
+            name:
+              type: string
+          required:
+            - name
+        [Entityname]Request:
+          allOf:
+            - $ref: '#/components/schemas/[Entityname]'
+        [Entityname]Response:
+          allOf:
+            - $ref: '#/components/schemas/[Entityname]'
+          required:
+            - id
           ```
 - pagination, sorting and search will be added later
 - Integration tests
