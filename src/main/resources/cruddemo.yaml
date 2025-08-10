@@ -56,12 +56,11 @@ paths:
             application/json:
               schema:
                 type: object
-                required:
-                  - results
-                results:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/RoomResponse'
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RoomResponse'
   /room/{roomId}:
     parameters:
       - $ref: "#/components/parameters/IdParam"
