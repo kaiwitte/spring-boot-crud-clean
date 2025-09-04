@@ -19,7 +19,7 @@ class RoomIT {
 
     @Test
     void shouldCreateRoom() {
-        RoomRequestDto roomRequest = new RoomRequestDto();
+        final RoomRequestDto roomRequest = new RoomRequestDto();
         roomRequest.setName("Conference Room A");
 
         final ResponseEntity<RoomResponseDto> response = restTemplate.postForEntity(
@@ -32,5 +32,19 @@ class RoomIT {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getId()).isNotNull();
         assertThat(response.getBody().getName()).isEqualTo("Conference Room A");
+    }
+
+    @Test
+    void shouldFailToCreateRoomWithoutName() {
+        final RoomRequestDto roomRequest = new RoomRequestDto();
+        roomRequest.setName(null); // Name is required
+
+        final ResponseEntity<RoomResponseDto> response = restTemplate.postForEntity(
+                "/rooms",
+                roomRequest,
+                RoomResponseDto.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 }
