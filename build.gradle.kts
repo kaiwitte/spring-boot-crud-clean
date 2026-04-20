@@ -3,6 +3,7 @@ plugins {
     id("org.springframework.boot") version "3.5.4"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.openapi.generator") version "7.14.0"
+    id("com.diffplug.spotless") version "8.4.0"
 }
 
 group = "com.witteconsulting"
@@ -30,6 +31,16 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+spotless {
+    java {
+        targetExclude("build/generated/**/*.java")
+        palantirJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
 
 openApiGenerate {

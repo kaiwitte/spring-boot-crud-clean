@@ -18,10 +18,7 @@ class HelloServiceIT {
 
     @Test
     void shouldRespondWithGreeting() {
-        final ResponseEntity<HelloResponseDto> response = restTemplate.getForEntity(
-                "/hello",
-                HelloResponseDto.class
-        );
+        final ResponseEntity<HelloResponseDto> response = restTemplate.getForEntity("/hello", HelloResponseDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();

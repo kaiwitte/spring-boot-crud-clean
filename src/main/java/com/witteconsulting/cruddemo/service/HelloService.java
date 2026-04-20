@@ -10,8 +10,7 @@ public class HelloService implements HelloApiDelegate {
 
     @Override
     public ResponseEntity<HelloResponseDto> hello() {
-        final HelloResponseDto response = new HelloResponseDto()
-                .message("Hello, World!");
+        final HelloResponseDto response = new HelloResponseDto().message("Hello, World!");
 
         return ResponseEntity.ok(response);
     }
