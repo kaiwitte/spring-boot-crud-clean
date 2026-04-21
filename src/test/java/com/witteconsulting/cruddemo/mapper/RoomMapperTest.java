@@ -1,13 +1,12 @@
 package com.witteconsulting.cruddemo.mapper;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.witteconsulting.cruddemo.entity.RoomEntity;
 import com.witteconsulting.cruddemo.model.RoomRequestDto;
 import com.witteconsulting.cruddemo.model.RoomResponseDto;
-import org.junit.jupiter.api.Test;
-
 import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class RoomMapperTest {
     @Test

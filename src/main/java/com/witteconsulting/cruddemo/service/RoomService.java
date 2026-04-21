@@ -6,12 +6,11 @@ import com.witteconsulting.cruddemo.mapper.RoomMapper;
 import com.witteconsulting.cruddemo.model.RoomRequestDto;
 import com.witteconsulting.cruddemo.model.RoomResponseDto;
 import com.witteconsulting.cruddemo.repository.RoomRepository;
+import java.net.URI;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.net.URI;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
