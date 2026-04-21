@@ -27,8 +27,18 @@ dependencies {
 
     implementation("org.openapitools:jackson-databind-nullable:0.2.6")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+
+    // Lombok
     implementation("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
+
+    // MapStruct
+    implementation("org.mapstruct:mapstruct:1.6.3")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
+
+    // Important: lombok-mapstruct-binding is needed when using Lombok Builders with MapStruct
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
