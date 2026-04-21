@@ -13,11 +13,11 @@ class RoomMapperTest {
     @Test
     void shouldMapDtoToEntity() {
         // Given
-        RoomRequestDto dto = new RoomRequestDto();
+        final RoomRequestDto dto = new RoomRequestDto();
         dto.setName("Conference Room");
 
         // When
-        RoomEntity entity = RoomMapper.INSTANCE.dtoToEntity(dto);
+        final RoomEntity entity = RoomMapper.INSTANCE.dtoToEntity(dto);
 
         // Then
         assertThat(entity).isNotNull();
@@ -28,11 +28,11 @@ class RoomMapperTest {
     @Test
     void shouldMapEntityToDto() {
         // Given
-        UUID id = UUID.randomUUID();
-        RoomEntity entity = RoomEntity.builder().id(id).name("Board Room").build();
+        final UUID id = UUID.randomUUID();
+        final RoomEntity entity = RoomEntity.builder().id(id).name("Board Room").build();
 
         // When
-        RoomResponseDto dto = RoomMapper.INSTANCE.entityToDto(entity);
+        final RoomResponseDto dto = RoomMapper.INSTANCE.entityToDto(entity);
 
         // Then
         assertThat(dto).isNotNull();
