@@ -7,5 +7,4 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface RoomRepository extends CrudRepository<RoomEntity, UUID> {
-}
+public interface RoomRepository extends CrudRepository<RoomEntity, UUID> {}
