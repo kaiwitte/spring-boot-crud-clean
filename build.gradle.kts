@@ -51,12 +51,32 @@ spotless {
         trimTrailingWhitespace()
         endWithNewline()
     }
+    kotlinGradle {
+        target("*.gradle.kts")
+        ktlint("1.3.1")
+    }
+    yaml {
+        target("**/*.yaml", "**/*.yml")
+        targetExclude("build/**/*.yaml", "build/**/*.yml")
+        jackson()
+    }
+    format("markdown") {
+        target("**/*.md")
+        targetExclude("build/**/*.md")
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
 
 openApiGenerate {
     generatorName.set("spring")
     inputSpec.set(file("src/main/resources/cruddemo.yaml").toURI().toString())
-    outputDir.set(layout.buildDirectory.dir("generated").get().asFile.absolutePath)
+    outputDir.set(
+        layout.buildDirectory
+            .dir("generated")
+            .get()
+            .asFile.absolutePath,
+    )
     apiPackage.set("com.witteconsulting.cruddemo.api")
     modelPackage.set("com.witteconsulting.cruddemo.model")
     modelNameSuffix.set("Dto")
@@ -65,8 +85,8 @@ openApiGenerate {
     configOptions.set(
         mapOf(
             "delegatePattern" to "true",
-            "useSpringBoot3" to "true"
-        )
+            "useSpringBoot3" to "true",
+        ),
     )
 }
 

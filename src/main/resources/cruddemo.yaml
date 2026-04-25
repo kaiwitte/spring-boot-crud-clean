@@ -1,170 +1,171 @@
-openapi: 3.1.1
+---
+openapi: "3.1.1"
 info:
-  title: Crud Demo API
-  version: 1.0.0
+  title: "Crud Demo API"
+  version: "1.0.0"
 paths:
   /hello:
     get:
-      summary: Returns a hello message
-      operationId: hello
+      summary: "Returns a hello message"
+      operationId: "hello"
       responses:
-        '200':
-          description: Successful response
+        "200":
+          description: "Successful response"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HelloResponse'
+                $ref: "#/components/schemas/HelloResponse"
   /rooms:
     post:
       tags:
-        - room
-      summary: Add Room
-      operationId: newRoom
+      - "room"
+      summary: "Add Room"
+      operationId: "newRoom"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RoomRequest'
+              $ref: "#/components/schemas/RoomRequest"
       responses:
         "201":
-          description: Created
+          description: "Created"
           headers:
             Location:
               schema:
-                type: string
-              description: URI of the created Room
+                type: "string"
+              description: "URI of the created Room"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RoomResponse'
-        '400':
-          description: Error in the request
+                $ref: "#/components/schemas/RoomResponse"
+        "400":
+          description: "Error in the request"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     get:
       tags:
-        - room
-      summary: Retrieve all Rooms
-      operationId: listRoom
+      - "room"
+      summary: "Retrieve all Rooms"
+      operationId: "listRoom"
       responses:
         "200":
-          description: Ok
+          description: "Ok"
           content:
             application/json:
               schema:
-                type: object
+                type: "object"
                 properties:
                   results:
-                    type: array
+                    type: "array"
                     items:
-                      $ref: '#/components/schemas/RoomResponse'
+                      $ref: "#/components/schemas/RoomResponse"
   /rooms/{roomId}:
     parameters:
-      - $ref: "#/components/parameters/IdParam"
+    - $ref: "#/components/parameters/IdParam"
     get:
       tags:
-        - room
-      summary: Retrieve Room
-      operationId: getRoom
+      - "room"
+      summary: "Retrieve Room"
+      operationId: "getRoom"
       responses:
         "200":
-          description: Ok
+          description: "Ok"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RoomResponse'
+                $ref: "#/components/schemas/RoomResponse"
         "404":
-          description: No Room found with this RoomId
+          description: "No Room found with this RoomId"
     put:
       tags:
-        - room
-      summary: Update Room
-      operationId: updateRoom
+      - "room"
+      summary: "Update Room"
+      operationId: "updateRoom"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RoomRequest'
+              $ref: "#/components/schemas/RoomRequest"
       responses:
         "200":
-          description: Ok
+          description: "Ok"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RoomResponse'
-        '400':
-          description: Error in the request
+                $ref: "#/components/schemas/RoomResponse"
+        "400":
+          description: "Error in the request"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: No Room found with this RoomId
+          description: "No Room found with this RoomId"
     delete:
       tags:
-        - room
-      summary: Delete Room
-      operationId: deleteRoom
+      - "room"
+      summary: "Delete Room"
+      operationId: "deleteRoom"
       responses:
         "200":
-          description: Ok
+          description: "Ok"
         "400":
-          description: Error in the request
+          description: "Error in the request"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: No Room found with this RoomId
+          description: "No Room found with this RoomId"
 components:
   parameters:
     IdParam:
-      name: roomId
-      in: path
+      name: "roomId"
+      in: "path"
       required: true
       schema:
-        type: string
-        format: uuid
+        type: "string"
+        format: "uuid"
   schemas:
     HelloResponse:
-      type: object
+      type: "object"
       properties:
         message:
-          type: string
+          type: "string"
       required:
-        - message
+      - "message"
     Room:
-      type: object
+      type: "object"
       properties:
         id:
-          type: string
-          format: uuid
+          type: "string"
+          format: "uuid"
           readOnly: true
-          description: unique ID. Ignored in requests, required in responses
+          description: "unique ID. Ignored in requests, required in responses"
         name:
-          type: string
+          type: "string"
       required:
-        - name
+      - "name"
     RoomRequest:
       allOf:
-        - $ref: '#/components/schemas/Room'
+      - $ref: "#/components/schemas/Room"
     RoomResponse:
       allOf:
-        - $ref: '#/components/schemas/Room'
+      - $ref: "#/components/schemas/Room"
       required:
-        - id
+      - "id"
     ErrorResponse:
-      type: object
+      type: "object"
       properties:
         message:
-          type: string
+          type: "string"
         errors:
-          type: array
+          type: "array"
           items:
-            type: string
+            type: "string"
       required:
-        - message
+      - "message"
