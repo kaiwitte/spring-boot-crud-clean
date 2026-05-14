@@ -1,3 +1,5 @@
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
 plugins {
     java
     id("org.springframework.boot") version "3.5.4"
@@ -88,6 +90,35 @@ openApiGenerate {
             "useSpringBoot3" to "true",
         ),
     )
+}
+
+// UNREVIEWED_AI_CODE
+val openApiGenerateTypeScript =
+    tasks.register<GenerateTask>("openApiGenerateTypeScript") {
+        generatorName.set("typescript-angular")
+        inputSpec.set(file("src/main/resources/cruddemo.yaml").toURI().toString())
+        // todo: more suitable output directory
+        outputDir.set(file("src/frontend/src/src/generated").absolutePath)
+        apiPackage.set("api")
+        modelPackage.set("model")
+        generateApiTests.set(false)
+        generateModelTests.set(false)
+        configOptions.set(
+            mapOf(
+                "ngVersion" to "21.2.0",
+                "providedIn" to "root",
+            ),
+        )
+        globalProperties.set(
+            mapOf(
+                "apiDocs" to "false",
+                "modelDocs" to "false",
+            ),
+        )
+    }
+
+tasks.named("openApiGenerate") {
+    dependsOn(openApiGenerateTypeScript)
 }
 
 // Add generated sources to source sets
