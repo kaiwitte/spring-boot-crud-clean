@@ -2,8 +2,10 @@ package com.witteconsulting.cruddemo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.witteconsulting.cruddemo.model.ListRoom200ResponseDto;
 import com.witteconsulting.cruddemo.model.RoomRequestDto;
 import com.witteconsulting.cruddemo.model.RoomResponseDto;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,5 +76,35 @@ class RoomIT {
                 restTemplate.getForEntity("/rooms/" + nonExistentRoomId, RoomResponseDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void shouldListRooms() {
+        // given
+        final RoomRequestDto firstRoomRequest = new RoomRequestDto();
+        firstRoomRequest.setName("Listing Room Alpha");
+        final RoomRequestDto secondRoomRequest = new RoomRequestDto();
+        secondRoomRequest.setName("Listing Room Beta");
+
+        final ResponseEntity<RoomResponseDto> firstCreateResponse =
+                restTemplate.postForEntity("/rooms", firstRoomRequest, RoomResponseDto.class);
+        final ResponseEntity<RoomResponseDto> secondCreateResponse =
+                restTemplate.postForEntity("/rooms", secondRoomRequest, RoomResponseDto.class);
+
+        assertThat(firstCreateResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(secondCreateResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(firstCreateResponse.getBody()).isNotNull();
+        assertThat(secondCreateResponse.getBody()).isNotNull();
+
+        // when
+        final ResponseEntity<ListRoom200ResponseDto> listResponse =
+                restTemplate.getForEntity("/rooms", ListRoom200ResponseDto.class);
+
+        // then
+        assertThat(listResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(listResponse.getBody()).isNotNull();
+        assertThat(listResponse.getBody().getResults())
+                .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id")
+                .containsAll(List.of(firstCreateResponse.getBody(), secondCreateResponse.getBody()));
     }
 }

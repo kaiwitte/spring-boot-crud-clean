@@ -3,10 +3,12 @@ package com.witteconsulting.cruddemo.service;
 import com.witteconsulting.cruddemo.api.RoomsApiDelegate;
 import com.witteconsulting.cruddemo.entity.RoomEntity;
 import com.witteconsulting.cruddemo.mapper.RoomMapper;
+import com.witteconsulting.cruddemo.model.ListRoom200ResponseDto;
 import com.witteconsulting.cruddemo.model.RoomRequestDto;
 import com.witteconsulting.cruddemo.model.RoomResponseDto;
 import com.witteconsulting.cruddemo.repository.RoomRepository;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -37,5 +39,14 @@ public class RoomService implements RoomsApiDelegate {
                 .map(RoomMapper.INSTANCE::entityToDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Override
+    public ResponseEntity<ListRoom200ResponseDto> listRoom() {
+        final List<RoomResponseDto> result = roomRepository.findAll().stream()
+                .map(RoomMapper.INSTANCE::entityToDto)
+                .toList();
+
+        return ResponseEntity.ok(new ListRoom200ResponseDto().results(result));
     }
 }

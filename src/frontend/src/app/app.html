@@ -9,4 +9,10 @@
     <p>id: {{ room.id }}</p>
     <p>name: {{ room.name }}</p>
   }
+
+  <ul>
+    @for (room of rooms(); track room.id) {
+      <li>{{ room.name }}</li>
+    }
+  </ul>
 </main>

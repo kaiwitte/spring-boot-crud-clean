@@ -2,8 +2,6 @@ package com.witteconsulting.cruddemo.repository;
 
 import com.witteconsulting.cruddemo.entity.RoomEntity;
 import java.util.UUID;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.ListCrudRepository;
 
-@Repository
-public interface RoomRepository extends CrudRepository<RoomEntity, UUID> {}
+public interface RoomRepository extends ListCrudRepository<RoomEntity, UUID> {}
