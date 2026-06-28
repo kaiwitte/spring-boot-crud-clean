@@ -31,8 +31,10 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 
     // Lombok
-    implementation("org.projectlombok:lombok")
+    compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
+    testCompileOnly("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
 
     // MapStruct
     implementation("org.mapstruct:mapstruct:1.6.3")
@@ -64,7 +66,10 @@ spotless {
     }
     format("markdown") {
         target("**/*.md")
-        targetExclude("build/**/*.md")
+        targetExclude(
+            "build/**/*.md",
+            "src/frontend/src/src/generated/**/*.md",
+        )
         trimTrailingWhitespace()
         endWithNewline()
     }
