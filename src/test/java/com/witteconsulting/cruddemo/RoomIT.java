@@ -1,110 +1,87 @@
 package com.witteconsulting.cruddemo;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.witteconsulting.cruddemo.model.ListRoom200ResponseDto;
+import com.witteconsulting.cruddemo.model.PaginationDto;
 import com.witteconsulting.cruddemo.model.RoomRequestDto;
 import com.witteconsulting.cruddemo.model.RoomResponseDto;
+import com.witteconsulting.cruddemo.model.SortDto;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import java.util.stream.Stream;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class RoomIT {
+class RoomIT extends AbstractCrudIT<RoomRequestDto, RoomResponseDto, ListRoom200ResponseDto> {
 
-    @Autowired
-    private TestRestTemplate restTemplate;
-
-    @Test
-    void shouldCreateRoom() {
-        final RoomRequestDto roomRequest = new RoomRequestDto();
-        roomRequest.setName("Conference Room B");
-
-        final ResponseEntity<RoomResponseDto> response =
-                restTemplate.postForEntity("/rooms", roomRequest, RoomResponseDto.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getId()).isNotNull();
-        assertThat(response.getBody().getName()).isEqualTo("Conference Room B");
+    RoomIT() {
+        super(RoomResponseDto.class, ListRoom200ResponseDto.class, "/rooms");
     }
 
-    @Test
-    void shouldFailToCreateRoomWithoutName() {
-        final RoomRequestDto roomRequest = new RoomRequestDto();
-        roomRequest.setName(null); // Name is required
-
-        final ResponseEntity<RoomResponseDto> response =
-                restTemplate.postForEntity("/rooms", roomRequest, RoomResponseDto.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    @Override
+    RoomRequestDto createNew(final String methodName, final int enumerator) {
+        return new RoomRequestDto().name("%s-%d".formatted(methodName, enumerator));
     }
 
-    @Test
-    void shouldPersistRoomAndRetrieveById() {
-        // Create a room
-        final RoomRequestDto roomRequest = new RoomRequestDto();
-        roomRequest.setName("Persistent Room");
-
-        final ResponseEntity<RoomResponseDto> createResponse =
-                restTemplate.postForEntity("/rooms", roomRequest, RoomResponseDto.class);
-
-        assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(createResponse.getBody()).isNotNull();
-        final String roomId = createResponse.getBody().getId().toString();
-
-        // Retrieve the room by ID to verify persistence
-        final ResponseEntity<RoomResponseDto> getResponse =
-                restTemplate.getForEntity("/rooms/" + roomId, RoomResponseDto.class);
-
-        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(getResponse.getBody()).isNotNull();
-        assertThat(getResponse.getBody().getId().toString()).isEqualTo(roomId);
-        assertThat(getResponse.getBody().getName()).isEqualTo("Persistent Room");
+    @Override
+    RoomRequestDto createNewInvalid(final String methodName) {
+        return new RoomRequestDto().name(null);
     }
 
-    @Test
-    void shouldReturn404ForNonExistentRoom() {
-        final UUID nonExistentRoomId = UUID.randomUUID();
-
-        final ResponseEntity<RoomResponseDto> response =
-                restTemplate.getForEntity("/rooms/" + nonExistentRoomId, RoomResponseDto.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    @Override
+    String[] getInvalidFields() {
+        return new String[] {"name"};
     }
 
-    @Test
-    void shouldListRooms() {
-        // given
-        final RoomRequestDto firstRoomRequest = new RoomRequestDto();
-        firstRoomRequest.setName("Listing Room Alpha");
-        final RoomRequestDto secondRoomRequest = new RoomRequestDto();
-        secondRoomRequest.setName("Listing Room Beta");
+    @Override
+    UUID extractId(final RoomResponseDto dto) {
+        return dto.getId();
+    }
 
-        final ResponseEntity<RoomResponseDto> firstCreateResponse =
-                restTemplate.postForEntity("/rooms", firstRoomRequest, RoomResponseDto.class);
-        final ResponseEntity<RoomResponseDto> secondCreateResponse =
-                restTemplate.postForEntity("/rooms", secondRoomRequest, RoomResponseDto.class);
+    @Override
+    String[] getComparisonIgnoreFields() {
+        return new String[] {"id"};
+    }
 
-        assertThat(firstCreateResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(secondCreateResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(firstCreateResponse.getBody()).isNotNull();
-        assertThat(secondCreateResponse.getBody()).isNotNull();
+    @Override
+    List<RoomResponseDto> extractResults(final ListRoom200ResponseDto body) {
+        return body.getResults();
+    }
 
-        // when
-        final ResponseEntity<ListRoom200ResponseDto> listResponse =
-                restTemplate.getForEntity("/rooms", ListRoom200ResponseDto.class);
+    @Override
+    void deleteAll() {
+        throw unsupported("deleteAll");
+    }
 
-        // then
-        assertThat(listResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(listResponse.getBody()).isNotNull();
-        assertThat(listResponse.getBody().getResults())
-                .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id")
-                .containsAll(List.of(firstCreateResponse.getBody(), secondCreateResponse.getBody()));
+    @Override
+    String getSortField() {
+        throw unsupported("getSortField");
+    }
+
+    @Override
+    PaginationDto getPagination(final ListRoom200ResponseDto listResponse) {
+        throw unsupported("getPagination");
+    }
+
+    @Override
+    SortDto getSort(final ListRoom200ResponseDto listResponse) {
+        throw unsupported("getSort");
+    }
+
+    @Override
+    Comparator<RoomResponseDto> getComparator() {
+        throw unsupported("getComparator");
+    }
+
+    @Override
+    Stream<FilterTestParameter<RoomResponseDto>> getSearchParameters() {
+        throw unsupported("getSearchParameters");
+    }
+
+    @Override
+    RoomRequestDto createRequestFromResponse(final RoomResponseDto response) {
+        throw unsupported("createRequestFromResponse");
+    }
+
+    private AssertionError unsupported(final String methodName) {
+        return new AssertionError(methodName + " is not implemented for the current RoomIT subset.");
     }
 }

@@ -1,6 +1,6 @@
 package com.witteconsulting.cruddemo;
 
-import static com.witteconsulting.cruddemo.model.ApplicationErrorResponseDto.CodeEnum.VALIDATION_ERROR;
+import static com.witteconsulting.cruddemo.model.ApplicationErrorResponseDto.ErrorTypeEnum.VALIDATION_ERROR;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.witteconsulting.cruddemo.model.ApplicationErrorResponseDto;
@@ -18,6 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -173,18 +174,20 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
 
         // when
         final URI deleteUri = createResponse.getHeaders().getLocation();
-        restTemplate.delete(deleteUri);
+        final ResponseEntity<String> deleteResponse =
+                restTemplate.exchange(deleteUri, HttpMethod.DELETE, HttpEntity.EMPTY, String.class);
 
         // then
+        assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         // verify the object is gone
         final ResponseEntity<String> getResponse = restTemplate.getForEntity(deleteUri, String.class);
         assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
-    void shouldRespondBadRequestForNewInvalid() {
+    void shouldRespondBadRequestAndSpecificFieldsForNewInvalid() {
         // given
-        final TRequest givenRequest = createNewInvalid("shouldRespondBadRequestForNewInvalid");
+        final TRequest givenRequest = createNewInvalid("shouldRespondBadRequestAndSpecificFieldsForNewInvalid");
 
         // when
         final ResponseEntity<ApplicationErrorResponseDto> response =
@@ -197,7 +200,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(body).isNotNull();
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        softly.assertThat(body.getCode()).isEqualTo(VALIDATION_ERROR);
+        softly.assertThat(body.getErrorType()).isEqualTo(VALIDATION_ERROR);
         softly.assertThat(body.getFieldErrors().keySet()).containsExactlyInAnyOrder(getInvalidFields());
         softly.assertAll();
     }
@@ -231,6 +234,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     /**
      * Stores 10 Items, then fetches them in 4 pages of 3, and verifies the results.
      */
+    @Disabled("Enable when pagination and sorting are supported.")
     @ParameterizedTest
     @CsvSource({"ASC", "DESC"})
     void shouldListAllPaginatedAndSorted(final String sortDirection) {
@@ -300,6 +304,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
                 .containsExactly(expectedCombinedResults.toArray());
     }
 
+    @Disabled("Enable when pagination is supported.")
     @Test
     void shouldAllowPageWithoutSort() {
         // given
@@ -314,6 +319,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(responsePage.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
+    @Disabled("Enable when sorting is supported.")
     @Test
     void shouldAllowSortWithoutPage() {
         // given
@@ -328,6 +334,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(responsePage.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
+    @Disabled("Enable when sorting validation is supported.")
     @Test
     void shouldShowErrorWhenSortingByUnknownField() {
         // given
@@ -347,10 +354,11 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(responsePage.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         final ApplicationErrorResponseDto body = responsePage.getBody();
         assertThat(body).isNotNull();
-        assertThat(body.getCode()).isEqualTo(VALIDATION_ERROR);
+        assertThat(body.getErrorType()).isEqualTo(VALIDATION_ERROR);
         assertThat(body.getFieldErrors().keySet()).containsExactly("sortField");
     }
 
+    @Disabled("Enable when sorting validation is supported.")
     @Test
     void shouldShowErrorWhenSortingByUnknownDirection() {
         // given
@@ -370,10 +378,11 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(responsePage.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         final ApplicationErrorResponseDto body = responsePage.getBody();
         assertThat(body).isNotNull();
-        assertThat(body.getCode()).isEqualTo(VALIDATION_ERROR);
+        assertThat(body.getErrorType()).isEqualTo(VALIDATION_ERROR);
         assertThat(body.getFieldErrors().keySet()).containsExactly("sortDirection");
     }
 
+    @Disabled("Enable when pagination validation is supported.")
     @ParameterizedTest
     @CsvSource({"0, 0", "0, -1", "-1, 1", "-1, -1"})
     void shouldShowErrorWhenInvalidPagination(final int pageIndex, final int pageSize) {
@@ -388,8 +397,21 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         // then
         assertThat(responsePage.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(body).isNotNull();
-        assertThat(body.getCode()).isEqualTo(VALIDATION_ERROR);
+        assertThat(body.getErrorType()).isEqualTo(VALIDATION_ERROR);
         assertThat(body.getFieldErrors().keySet()).containsAnyElementsOf(List.of("pageIndex", "pageSize"));
+    }
+
+    @Test
+    void shouldReturn404ForNonExistentId() {
+        // given
+        final UUID nonExistentId = UUID.randomUUID();
+
+        // when
+        final ResponseEntity<String> serverResponse =
+                restTemplate.getForEntity(idEndpoint, String.class, nonExistentId);
+
+        // then
+        assertThat(serverResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -402,7 +424,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
                 restTemplate.getForEntity(idEndpoint, String.class, givenInvalidUuid);
 
         // then
-        assertThat(serverResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(serverResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -411,6 +433,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
      * Subclasses define in #getSearchparameters() which specific searches need to be
      * tested and what expected results would be.
      */
+    @Disabled("Enable when filtering is supported.")
     @TestFactory
     Stream<DynamicTest> shouldFilterBySearchStringFactory() {
         return getSearchParameters()

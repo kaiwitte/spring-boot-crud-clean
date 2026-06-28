@@ -194,10 +194,8 @@ components:
       properties:
         message:
           type: "string"
-        code:
-          description: "the type of error. VALIDATION_ERROR invalid value for field\
-            \ in request BAD_REQUEST error in the request format INTERNAL_SERVER_ERROR\
-            \ internal server error"
+        errorType:
+          description: "the type of error that occurred"
           type: "string"
           enum:
           - "VALIDATION_ERROR"
@@ -213,5 +211,5 @@ components:
           additionalProperties:
             type: "string"
       required:
-      - "code"
+      - "errorType"
       - "message"
