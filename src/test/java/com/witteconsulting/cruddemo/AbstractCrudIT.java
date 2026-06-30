@@ -79,52 +79,52 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
      * @param enumerator a number >= 0
      * @return a valid request DTO
      */
-    abstract TRequest createNew(final String methodName, final int enumerator);
+    abstract TRequest templateCreateValidRequest(final String methodName, final int enumerator);
 
     /**
      * Define how to create an instance that triggers a bean validation error.
      */
-    abstract TRequest createNewInvalid(final String methodName);
+    abstract TRequest templateCreateInvalidRequest(final String methodName);
 
     /**
-     * Companion method to {@link #createNewInvalid(String)} which must return the names of the fields which
-     * have invalid values in the former.
+     * Companion method to {@link #templateCreateInvalidRequest(String)} which must return the names of the fields
+     * that have invalid values in that request.
      */
-    abstract String[] getFieldNamesWithInvalidValues();
+    abstract String[] templateInvalidRequestFieldNames();
 
-    abstract UUID extractId(TResponse dto);
+    abstract UUID templateExtractId(TResponse dto);
 
-    abstract String[] getComparisonIgnoreFields();
+    abstract String[] templateComparisonIgnoredFields();
 
-    abstract List<TResponse> extractResults(final TListResponse body);
+    abstract List<TResponse> templateExtractResults(final TListResponse body);
 
-    abstract void deleteAll();
+    abstract void templateDeleteAllExisting();
 
-    abstract String getSortField();
+    abstract String templateSortField();
 
-    abstract PaginationDto getPagination(final TListResponse listResponse);
+    abstract PaginationDto templateExtractPagination(final TListResponse listResponse);
 
-    abstract SortDto getSort(final TListResponse listResponse);
+    abstract SortDto templateExtractSort(final TListResponse listResponse);
 
-    abstract Comparator<TResponse> getComparator();
+    abstract Comparator<TResponse> templateSortComparator();
 
     /**
      * Search parameters for {@link #shouldFilterBySearchStringFactory()}
      */
-    abstract Stream<FilterTestParameter<TResponse>> getSearchParameters();
+    abstract Stream<FilterTestParameter<TResponse>> templateFilterExamples();
 
     /**
      * Define how to create a new request from a received response in order
      * to do an update (PUT).
      */
-    abstract TRequest createRequestFromResponse(TResponse response);
+    abstract TRequest templateCreateRequestFromResponse(TResponse response);
 
     /**
      * Modifications to test for {@link #shouldUpdateFactory()}.
      * Implement changes to a DTO here to let the test verify that those
      * are reflected in the response and in the next read.
      */
-    Stream<EditTestParameter<TRequest>> getModifications() {
+    Stream<EditTestParameter<TRequest>> templateUpdateModifications() {
         // should override!
         return Stream.of(
                 // noop
@@ -134,14 +134,14 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     /**
      * Check that an ID has been generated. For check in nested classes, override.
      */
-    void checkGeneratedIds(final TResponse responseDto) {
-        assertThat(extractId(responseDto)).isNotNull();
+    void templateCheckGeneratedIds(final TResponse responseDto) {
+        assertThat(templateExtractId(responseDto)).isNotNull();
     }
 
     @Test
     void shouldCreateNew() {
         // given
-        final TRequest givenDto = createNew("shouldCreateNew", 1);
+        final TRequest givenDto = templateCreateValidRequest("shouldCreateNew", 1);
 
         // when
         final ResponseEntity<TResponse> createResponse = restTemplate.postForEntity(endpoint, givenDto, responseClass);
@@ -151,12 +151,12 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(createBody).isNotNull();
         final String expectedLocation =
                 // example: "http://localhost:%d/api/v1/example/%s"
-                endpoint.replace("{port}", "%d").concat("/%s").formatted(extractId(createBody));
+                endpoint.replace("{port}", "%d").concat("/%s").formatted(templateExtractId(createBody));
         assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(createResponse.getHeaders().get("Location")).containsExactly(expectedLocation);
         assertThat(createBody)
                 .usingRecursiveComparison()
-                .ignoringFields(getComparisonIgnoreFields())
+                .ignoringFields(templateComparisonIgnoredFields())
                 .isEqualTo(givenDto);
 
         // retrieve newly created object
@@ -164,17 +164,17 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         final TResponse findBody = getResponse.getBody();
         assertThat(findBody).isNotNull();
-        checkGeneratedIds(findBody);
+        templateCheckGeneratedIds(findBody);
         assertThat(findBody)
                 .usingRecursiveComparison()
-                .ignoringFields(getComparisonIgnoreFields())
+                .ignoringFields(templateComparisonIgnoredFields())
                 .isEqualTo(givenDto);
     }
 
     @Test
     void shouldDeleteExisting() {
         // given
-        final TRequest givenDto = createNew("shouldDeleteExisting", 1);
+        final TRequest givenDto = templateCreateValidRequest("shouldDeleteExisting", 1);
         final ResponseEntity<TResponse> createResponse = restTemplate.postForEntity(endpoint, givenDto, responseClass);
         assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
@@ -193,7 +193,8 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     @Test
     void shouldRespondBadRequestAndSpecificFieldsForNewInvalid() {
         // given
-        final TRequest givenRequest = createNewInvalid("shouldRespondBadRequestAndSpecificFieldsForNewInvalid");
+        final TRequest givenRequest =
+                templateCreateInvalidRequest("shouldRespondBadRequestAndSpecificFieldsForNewInvalid");
 
         // when
         final ResponseEntity<ApplicationErrorResponseDto> response =
@@ -207,15 +208,15 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         softly.assertThat(body.getErrorType()).isEqualTo(VALIDATION_ERROR);
-        softly.assertThat(body.getFieldErrors().keySet()).containsExactlyInAnyOrder(getFieldNamesWithInvalidValues());
+        softly.assertThat(body.getFieldErrors().keySet()).containsExactlyInAnyOrder(templateInvalidRequestFieldNames());
         softly.assertAll();
     }
 
     @Test
     void shouldListAllWhenUnpaginated() {
         // given
-        final TRequest given1 = createNew("shouldListAllWhenUnpaginated", 1);
-        final TRequest given2 = createNew("shouldListAllWhenUnpaginated", 2);
+        final TRequest given1 = templateCreateValidRequest("shouldListAllWhenUnpaginated", 1);
+        final TRequest given2 = templateCreateValidRequest("shouldListAllWhenUnpaginated", 2);
         final ResponseEntity<TResponse> createResponse1 = restTemplate.postForEntity(endpoint, given1, responseClass);
         final ResponseEntity<TResponse> createResponse2 = restTemplate.postForEntity(endpoint, given2, responseClass);
         final TResponse created1 = createResponse1.getBody();
@@ -230,9 +231,9 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(listResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         final TListResponse body = listResponse.getBody();
         assertThat(body).isNotNull();
-        final List<TResponse> results = extractResults(body);
+        final List<TResponse> results = templateExtractResults(body);
         assertThat(results)
-                .usingRecursiveFieldByFieldElementComparatorIgnoringFields(getComparisonIgnoreFields())
+                .usingRecursiveFieldByFieldElementComparatorIgnoringFields(templateComparisonIgnoredFields())
                 .isNotNull()
                 .containsAll(List.of(created1, created2));
     }
@@ -245,16 +246,16 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     @CsvSource({"ASC", "DESC"})
     void shouldListAllPaginatedAndSorted(final String sortDirection) {
         // given
-        deleteAll();
+        templateDeleteAllExisting();
         final List<TResponse> givenResponses = new ArrayList<>();
         final ArrayList<Object> foundDtos = new ArrayList<>();
         final int numGivenDtos = 10;
         final int pageSize = 3;
         final int numExpectedDtosLastPage = 1;
         final int numExpectedPages = 4;
-        final String sortField = getSortField();
+        final String sortField = templateSortField();
         for (int i = 0; i < numGivenDtos; i++) {
-            final TRequest given = createNew("shouldListAllPaginatedAndSorted", i);
+            final TRequest given = templateCreateValidRequest("shouldListAllPaginatedAndSorted", i);
             final ResponseEntity<TResponse> createResponse = restTemplate.postForEntity(endpoint, given, responseClass);
             givenResponses.add(Objects.requireNonNull(createResponse.getBody()));
         }
@@ -275,7 +276,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
             final TListResponse listResponse = responsePage.getBody();
             assertThat(listResponse).isNotNull();
 
-            final PaginationDto pagination = getPagination(listResponse);
+            final PaginationDto pagination = templateExtractPagination(listResponse);
             assertThat(pagination).isNotNull();
             assertThat(pagination.getTotal()).isEqualTo(BigDecimal.valueOf(numGivenDtos));
             assertThat(pagination.getIndex()).isEqualTo(BigDecimal.valueOf(pageIndex));
@@ -283,12 +284,12 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
             assertThat(pagination.getHasPrev()).isEqualTo(pageIndex != 0);
             assertThat(pagination.getSize()).isEqualTo(BigDecimal.valueOf(pageSize));
 
-            final SortDto sort = getSort(listResponse);
+            final SortDto sort = templateExtractSort(listResponse);
             assertThat(sort).isNotNull();
             assertThat(sort.getDirection()).hasToString(sortDirection);
             assertThat(sort.getField()).isEqualTo(sortField);
 
-            final List<TResponse> results = extractResults(listResponse);
+            final List<TResponse> results = templateExtractResults(listResponse);
             assertThat(results).isNotNull();
             assertThat(results).hasSize(pageIndex == 3 ? numExpectedDtosLastPage : pageSize);
             foundDtos.addAll(results);
@@ -300,13 +301,13 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
                     case "ASC" -> givenResponses;
                     case "DESC" -> {
                         final List<TResponse> reversed = new ArrayList<>(givenResponses);
-                        reversed.sort(getComparator().reversed());
+                        reversed.sort(templateSortComparator().reversed());
                         yield reversed;
                     }
                     default -> throw new IllegalArgumentException("Invalid sortDirection: " + sortDirection);
                 };
         assertThat(foundDtos)
-                .usingRecursiveFieldByFieldElementComparatorIgnoringFields(getComparisonIgnoreFields())
+                .usingRecursiveFieldByFieldElementComparatorIgnoringFields(templateComparisonIgnoredFields())
                 .containsExactly(expectedCombinedResults.toArray());
     }
 
@@ -330,7 +331,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     void shouldAllowSortWithoutPage() {
         // given
         final String sortDirection = "DESC";
-        final String sortField = getSortField();
+        final String sortField = templateSortField();
 
         // when
         final ResponseEntity<TListResponse> responsePage = restTemplate.getForEntity(
@@ -436,13 +437,13 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     /**
      * Generates one test for each search query that subclasses define which assert
      * that the search yields the expected results.
-     * Subclasses define in #getSearchparameters() which specific searches need to be
+     * Subclasses define in #templateFilterExamples() which specific searches need to be
      * tested and what expected results would be.
      */
     @Disabled("Enable when filtering is supported.")
     @TestFactory
     Stream<DynamicTest> shouldFilterBySearchStringFactory() {
-        return getSearchParameters()
+        return templateFilterExamples()
                 .map(filterTestParameter -> DynamicTest.dynamicTest(
                         filterTestParameter.name, () -> shouldFilterBySearchString(filterTestParameter)));
     }
@@ -462,10 +463,10 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(listResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         final TListResponse body = listResponse.getBody();
         assertThat(body).isNotNull();
-        final List<TResponse> results = extractResults(body);
+        final List<TResponse> results = templateExtractResults(body);
         assertThat(results).isNotNull();
         assertThat(results)
-                .usingRecursiveFieldByFieldElementComparatorIgnoringFields(getComparisonIgnoreFields())
+                .usingRecursiveFieldByFieldElementComparatorIgnoringFields(templateComparisonIgnoredFields())
                 .containsExactly(filterTestParameter.expectedFound);
         assertThat(results).doesNotContain(filterTestParameter.expectedNotFound);
     }
@@ -476,14 +477,14 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
      */
     @TestFactory
     Stream<DynamicTest> shouldUpdateFactory() {
-        return getModifications()
+        return templateUpdateModifications()
                 .map(modificationParameter ->
                         DynamicTest.dynamicTest(modificationParameter.name, () -> shouldUpdate(modificationParameter)));
     }
 
     private void shouldUpdate(final EditTestParameter<TRequest> modification) {
         // given
-        final TRequest givenDto = createNew("shouldUpdate", 0);
+        final TRequest givenDto = templateCreateValidRequest("shouldUpdate", 0);
         final ResponseEntity<TResponse> createResponse = restTemplate.postForEntity(endpoint, givenDto, responseClass);
         final TResponse createResponseBody = checkBody(HttpStatus.CREATED, createResponse, givenDto);
         final String location = Objects.requireNonNull(
@@ -491,7 +492,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
                 .getFirst();
 
         // when (modify)
-        final TRequest modifiedRequest = createRequestFromResponse(createResponseBody);
+        final TRequest modifiedRequest = templateCreateRequestFromResponse(createResponseBody);
         modification.modification.accept(modifiedRequest);
         final ResponseEntity<TResponse> modificationResponse =
                 restTemplate.exchange(location, HttpMethod.PUT, new HttpEntity<>(modifiedRequest), responseClass);
@@ -513,11 +514,11 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(actualResponse.getStatusCode()).isEqualTo(expectedStatus);
         final TResponse actualResponseBody = actualResponse.getBody();
         assertThat(actualResponseBody).isNotNull();
-        checkGeneratedIds(actualResponseBody);
+        templateCheckGeneratedIds(actualResponseBody);
 
         assertThat(actualResponseBody)
                 .usingRecursiveComparison()
-                .ignoringFields(getComparisonIgnoreFields())
+                .ignoringFields(templateComparisonIgnoredFields())
                 .isEqualTo(givenRequestBody);
         return actualResponseBody;
     }

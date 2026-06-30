@@ -17,72 +17,72 @@ class RoomIT extends AbstractCrudIT<RoomRequestDto, RoomResponseDto, ListRoom200
     }
 
     @Override
-    RoomRequestDto createNew(final String methodName, final int enumerator) {
+    RoomRequestDto templateCreateValidRequest(final String methodName, final int enumerator) {
         return new RoomRequestDto().name("%s-%d".formatted(methodName, enumerator));
     }
 
     @Override
-    RoomRequestDto createNewInvalid(final String methodName) {
+    RoomRequestDto templateCreateInvalidRequest(final String methodName) {
         return new RoomRequestDto().name(null);
     }
 
     @Override
-    String[] getFieldNamesWithInvalidValues() {
+    String[] templateInvalidRequestFieldNames() {
         return new String[] {"name"};
     }
 
     @Override
-    UUID extractId(final RoomResponseDto dto) {
+    UUID templateExtractId(final RoomResponseDto dto) {
         return dto.getId();
     }
 
     @Override
-    String[] getComparisonIgnoreFields() {
+    String[] templateComparisonIgnoredFields() {
         return new String[] {"id"};
     }
 
     @Override
-    List<RoomResponseDto> extractResults(final ListRoom200ResponseDto body) {
+    List<RoomResponseDto> templateExtractResults(final ListRoom200ResponseDto body) {
         return body.getResults();
     }
 
     @Override
-    void deleteAll() {
-        throw unsupported("deleteAll");
+    void templateDeleteAllExisting() {
+        throw unsupported("templateDeleteAllExisting");
     }
 
     @Override
-    String getSortField() {
-        throw unsupported("getSortField");
+    String templateSortField() {
+        throw unsupported("templateSortField");
     }
 
     @Override
-    PaginationDto getPagination(final ListRoom200ResponseDto listResponse) {
-        throw unsupported("getPagination");
+    PaginationDto templateExtractPagination(final ListRoom200ResponseDto listResponse) {
+        throw unsupported("templateExtractPagination");
     }
 
     @Override
-    SortDto getSort(final ListRoom200ResponseDto listResponse) {
-        throw unsupported("getSort");
+    SortDto templateExtractSort(final ListRoom200ResponseDto listResponse) {
+        throw unsupported("templateExtractSort");
     }
 
     @Override
-    Comparator<RoomResponseDto> getComparator() {
-        throw unsupported("getComparator");
+    Comparator<RoomResponseDto> templateSortComparator() {
+        throw unsupported("templateSortComparator");
     }
 
     @Override
-    Stream<FilterTestParameter<RoomResponseDto>> getSearchParameters() {
-        throw unsupported("getSearchParameters");
+    Stream<FilterTestParameter<RoomResponseDto>> templateFilterExamples() {
+        throw unsupported("templateFilterExamples");
     }
 
     @Override
-    RoomRequestDto createRequestFromResponse(final RoomResponseDto response) {
+    RoomRequestDto templateCreateRequestFromResponse(final RoomResponseDto response) {
         return new RoomRequestDto().name(response.getName());
     }
 
     @Override
-    Stream<EditTestParameter<RoomRequestDto>> getModifications() {
+    Stream<EditTestParameter<RoomRequestDto>> templateUpdateModifications() {
         return Stream.of(
                 new EditTestParameter<>("change name", dto -> dto.setName("%s-updated".formatted(dto.getName()))));
     }
