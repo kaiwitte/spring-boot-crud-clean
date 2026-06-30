@@ -31,6 +31,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * An abstract base class for general CRUD operations against a REST API.
@@ -149,11 +150,9 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         // then
         final TResponse createBody = createResponse.getBody();
         assertThat(createBody).isNotNull();
-        final String expectedLocation =
-                // example: "http://localhost:%d/api/v1/example/%s"
-                endpoint.replace("{port}", "%d").concat("/%s").formatted(templateExtractId(createBody));
+        final URI expectedLocation = expectedUriForId(templateExtractId(createBody));
         assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(createResponse.getHeaders().get("Location")).containsExactly(expectedLocation);
+        assertThat(createResponse.getHeaders().getLocation()).isEqualTo(expectedLocation);
         assertThat(createBody)
                 .usingRecursiveComparison()
                 .ignoringFields(templateComparisonIgnoredFields())
@@ -487,9 +486,8 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         final TRequest givenDto = templateCreateValidRequest("shouldUpdate", 0);
         final ResponseEntity<TResponse> createResponse = restTemplate.postForEntity(endpoint, givenDto, responseClass);
         final TResponse createResponseBody = checkBody(HttpStatus.CREATED, createResponse, givenDto);
-        final String location = Objects.requireNonNull(
-                        createResponse.getHeaders().get("Location"))
-                .getFirst();
+        final URI location = createResponse.getHeaders().getLocation();
+        assertThat(location).isNotNull();
 
         // when (modify)
         final TRequest modifiedRequest = templateCreateRequestFromResponse(createResponseBody);
@@ -521,5 +519,12 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
                 .ignoringFields(templateComparisonIgnoredFields())
                 .isEqualTo(givenRequestBody);
         return actualResponseBody;
+    }
+
+    private URI expectedUriForId(final UUID uuid) {
+        return UriComponentsBuilder.fromPath(endpoint)
+                .pathSegment(uuid.toString())
+                .build()
+                .toUri();
     }
 }

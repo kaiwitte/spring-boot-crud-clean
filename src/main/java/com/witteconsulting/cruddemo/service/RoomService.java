@@ -13,6 +13,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +29,12 @@ public class RoomService implements RoomsApiDelegate {
 
         final RoomResponseDto response = RoomMapper.INSTANCE.entityToDto(savedEntity);
 
-        return ResponseEntity.created(URI.create("/rooms/" + savedEntity.getId()))
-                .body(response);
+        final URI location = UriComponentsBuilder.fromPath("/rooms")
+                .pathSegment(savedEntity.getId().toString())
+                .build()
+                .toUri();
+
+        return ResponseEntity.created(location).body(response);
     }
 
     @Override
