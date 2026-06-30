@@ -81,9 +81,16 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
      */
     abstract TRequest createNew(final String methodName, final int enumerator);
 
-    abstract TRequest createNewInvalid(@SuppressWarnings("SameParameterValue") final String methodName);
+    /**
+     * Define how to create an instance that triggers a bean validation error.
+     */
+    abstract TRequest createNewInvalid(final String methodName);
 
-    abstract String[] getInvalidFields();
+    /**
+     * Companion method to {@link #createNewInvalid(String)} which must return the names of the fields which
+     * have invalid values in the former.
+     */
+    abstract String[] getFieldNamesWithInvalidValues();
 
     abstract UUID extractId(TResponse dto);
 
@@ -146,7 +153,6 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
                 // example: "http://localhost:%d/api/v1/example/%s"
                 endpoint.replace("{port}", "%d").concat("/%s").formatted(extractId(createBody));
         assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        // todo: work with relative URI
         assertThat(createResponse.getHeaders().get("Location")).containsExactly(expectedLocation);
         assertThat(createBody)
                 .usingRecursiveComparison()
@@ -201,7 +207,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         final SoftAssertions softly = new SoftAssertions();
         softly.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         softly.assertThat(body.getErrorType()).isEqualTo(VALIDATION_ERROR);
-        softly.assertThat(body.getFieldErrors().keySet()).containsExactlyInAnyOrder(getInvalidFields());
+        softly.assertThat(body.getFieldErrors().keySet()).containsExactlyInAnyOrder(getFieldNamesWithInvalidValues());
         softly.assertAll();
     }
 

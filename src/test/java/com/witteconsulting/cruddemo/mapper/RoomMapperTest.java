@@ -38,4 +38,38 @@ class RoomMapperTest {
         assertThat(dto.getId()).isEqualTo(id);
         assertThat(dto.getName()).isEqualTo("Board Room");
     }
+
+    @Test
+    void shouldUpdateEntityFromDto() {
+        // Given
+        final UUID id = UUID.randomUUID();
+        final RoomEntity originalEntity =
+                RoomEntity.builder().id(id).name("Original Room").build();
+        final RoomRequestDto updateRequestDto = new RoomRequestDto();
+        updateRequestDto.setName("Updated Room");
+
+        // When
+        RoomMapper.INSTANCE.updateEntityFromDto(updateRequestDto, originalEntity);
+
+        // Then
+        assertThat(originalEntity.getName()).isEqualTo("Updated Room");
+    }
+
+    @Test
+    void shouldPreserveEntityIdWhenUpdatingFromDto() {
+        // Given
+        final UUID existingId = UUID.randomUUID();
+        final UUID requestId = UUID.randomUUID();
+        final RoomEntity entity =
+                RoomEntity.builder().id(existingId).name("Original Room").build();
+        final RoomRequestDto updateRequestDto = new RoomRequestDto();
+        updateRequestDto.setId(requestId);
+        updateRequestDto.setName("Updated Room");
+
+        // When
+        RoomMapper.INSTANCE.updateEntityFromDto(updateRequestDto, entity);
+
+        // Then
+        assertThat(entity.getId()).isEqualTo(existingId);
+    }
 }

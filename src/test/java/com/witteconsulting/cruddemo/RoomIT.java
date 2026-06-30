@@ -27,7 +27,7 @@ class RoomIT extends AbstractCrudIT<RoomRequestDto, RoomResponseDto, ListRoom200
     }
 
     @Override
-    String[] getInvalidFields() {
+    String[] getFieldNamesWithInvalidValues() {
         return new String[] {"name"};
     }
 
@@ -78,7 +78,13 @@ class RoomIT extends AbstractCrudIT<RoomRequestDto, RoomResponseDto, ListRoom200
 
     @Override
     RoomRequestDto createRequestFromResponse(final RoomResponseDto response) {
-        throw unsupported("createRequestFromResponse");
+        return new RoomRequestDto().name(response.getName());
+    }
+
+    @Override
+    Stream<EditTestParameter<RoomRequestDto>> getModifications() {
+        return Stream.of(
+                new EditTestParameter<>("change name", dto -> dto.setName("%s-updated".formatted(dto.getName()))));
     }
 
     private AssertionError unsupported(final String methodName) {

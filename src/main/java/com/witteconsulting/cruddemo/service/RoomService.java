@@ -42,6 +42,29 @@ public class RoomService implements RoomsApiDelegate {
     }
 
     @Override
+    public ResponseEntity<Void> deleteRoom(final UUID roomId) {
+        if (!roomRepository.existsById(roomId)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        roomRepository.deleteById(roomId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<RoomResponseDto> updateRoom(final UUID roomId, final RoomRequestDto roomRequestDto) {
+        return roomRepository
+                .findById(roomId)
+                .map(entity -> {
+                    RoomMapper.INSTANCE.updateEntityFromDto(roomRequestDto, entity);
+                    final RoomEntity savedEntity = roomRepository.save(entity);
+                    return RoomMapper.INSTANCE.entityToDto(savedEntity);
+                })
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Override
     public ResponseEntity<ListRoom200ResponseDto> listRoom() {
         final List<RoomResponseDto> result = roomRepository.findAll().stream()
                 .map(RoomMapper.INSTANCE::entityToDto)
