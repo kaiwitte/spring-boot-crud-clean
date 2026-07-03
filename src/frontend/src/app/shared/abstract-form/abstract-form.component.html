@@ -1,0 +1,25 @@
+<form [formGroup]="form()" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+  @if (generalErrors().length > 0) {
+    <div class="rounded border border-red-300 bg-red-50 px-4 py-2 text-red-800" role="alert">
+      <ul class="list-inside list-disc">
+        @for (error of generalErrors(); track error) {
+          <li>{{ error }}</li>
+        }
+      </ul>
+    </div>
+  }
+
+  <ng-content />
+
+  <div class="flex items-center gap-2">
+    <button matButton="filled" type="submit" [disabled]="pending()">
+      @if (pending()) {
+        <mat-spinner diameter="18" class="mr-2 inline-block align-middle" />
+      }
+      {{ submitLabel() }}
+    </button>
+    @if (cancelLink(); as link) {
+      <a matButton [routerLink]="[...link]">Cancel</a>
+    }
+  </div>
+</form>

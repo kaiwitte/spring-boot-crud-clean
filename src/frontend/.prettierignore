@@ -1,0 +1,3 @@
+# OpenAPI generated sources stay exactly as the generator emits them
+src/src/generated/
+dist/

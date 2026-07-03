@@ -1,47 +1,56 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
-import { provideApi } from '../src/generated';
+import { provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
+
+import { provideApi } from '@generated';
+
 import { App } from './app';
+import { routes } from './app.routes';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
+        provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter(routes),
         provideApi({ basePath: 'http://localhost:8080' }),
       ],
     }).compileComponents();
   });
 
-  it('should create the app', () => {
+  it('renders the toolbar with navigation to the room list', () => {
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
-
-  //UNREVIEWED_AI_CODE
-  it('should create a room when the button is clicked', () => {
-    const fixture = TestBed.createComponent(App);
-    const httpTesting = TestBed.inject(HttpTestingController);
-
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const button = compiled.querySelector('button');
+    expect(compiled.textContent).toContain('Crud Demo');
 
-    button?.click();
+    const roomsLink = compiled.querySelector<HTMLAnchorElement>('a[href="/rooms"]');
+    expect(roomsLink?.textContent).toContain('Rooms');
+  });
+
+  it('shows rooms loaded through the generated API on the list route', async () => {
+    const harness = await RouterTestingHarness.create('/rooms');
+    const httpTesting = TestBed.inject(HttpTestingController);
+    await harness.fixture.whenStable();
 
     const request = httpTesting.expectOne('http://localhost:8080/rooms');
-    expect(request.request.method).toBe('POST');
-    request.flush({ id: 'room-1', name: 'Room test' });
+    expect(request.request.method).toBe('GET');
+    request.flush({ results: [{ id: 'room-1', name: 'Blue Room' }] });
 
-    fixture.detectChanges();
+    await harness.fixture.whenStable();
+    harness.detectChanges();
 
-    expect(compiled.textContent).toContain('Created room room-1');
-    expect(compiled.textContent).toContain('name: Room test');
+    expect(harness.routeNativeElement?.textContent).toContain('Blue Room');
+  });
+
+  it('renders the not-found page for unknown routes', async () => {
+    const harness = await RouterTestingHarness.create('/does-not-exist');
+
+    expect(harness.routeNativeElement?.textContent).toContain('Page not found');
   });
 });

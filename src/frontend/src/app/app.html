@@ -1,18 +1,9 @@
-<main>
-  <button type="button" (click)="createRoom()" [disabled]="isSubmitting()">
-    Create room
-  </button>
-
-  <p>{{ status() }}</p>
-
-  @if (createdRoom(); as room) {
-    <p>id: {{ room.id }}</p>
-    <p>name: {{ room.name }}</p>
-  }
-
-  <ul>
-    @for (room of rooms(); track room.id) {
-      <li>{{ room.name }}</li>
-    }
-  </ul>
+<mat-toolbar class="flex gap-6">
+  <a routerLink="/" class="text-lg font-medium">Crud Demo</a>
+  <nav class="flex gap-2">
+    <a matButton routerLink="/rooms" routerLinkActive="font-semibold underline">Rooms</a>
+  </nav>
+</mat-toolbar>
+<main class="mx-auto w-full max-w-5xl p-4">
+  <router-outlet />
 </main>

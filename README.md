@@ -19,3 +19,7 @@ This project makes minimal use of AI; everything beyond would defeat the purpose
 it to compare different agents and models, but in an "AI as code completion" approach:
 A faster - or sometimes slower - way to generate the code exactly as I would type it, or, at the
 very least, code where I can vouch for every single character and whitespace.
+
+Well, except for the Angular frontend in /frontend. Fable-5 is briefly available at a good price, and
+really let it loose there to see what it can do. That was not the original plan, but a great
+opportunity, as I had the backend mostly ready.

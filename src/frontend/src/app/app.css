@@ -1,16 +1,4 @@
 :host {
   display: block;
-  padding: 16px;
-  font-family: sans-serif;
-}
-
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-button {
-  padding: 4px 8px;
+  min-height: 100%;
 }

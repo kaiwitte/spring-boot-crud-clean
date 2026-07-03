@@ -1,0 +1,19 @@
+<h2 mat-dialog-title>Delete {{ data.entityName }}</h2>
+<mat-dialog-content>
+  <p>
+    Are you sure you want to delete &ldquo;{{ data.itemLabel }}&rdquo;? This action cannot be
+    undone.
+  </p>
+  @if (error(); as message) {
+    <p class="mt-2 text-red-700" role="alert">{{ message }}</p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button matButton type="button" [disabled]="pending()" (click)="cancel()">Cancel</button>
+  <button matButton="filled" type="button" [disabled]="pending()" (click)="confirm()">
+    @if (pending()) {
+      <mat-spinner diameter="18" class="mr-2 inline-block align-middle" />
+    }
+    Delete
+  </button>
+</mat-dialog-actions>

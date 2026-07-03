@@ -1,0 +1,20 @@
+@switch (state().kind) {
+  @case ('loading') {
+    <div class="flex justify-center p-12">
+      <mat-spinner diameter="48" />
+    </div>
+  }
+  @case ('not-found') {
+    <mat-card>
+      <mat-card-content>
+        <p class="py-4 text-lg">{{ entityName() }} not found.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <a matButton [routerLink]="[...backLink()]">Back</a>
+      </mat-card-actions>
+    </mat-card>
+  }
+  @default {
+    <ng-content />
+  }
+}
