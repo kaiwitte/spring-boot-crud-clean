@@ -78,8 +78,12 @@ class RoomIT extends AbstractCrudIT<RoomRequestDto, RoomResponseDto, ListRoom200
     }
 
     @Override
-    Stream<FilterTestParameter<RoomResponseDto>> templateFilterExamples() {
-        throw unsupported("templateFilterExamples");
+    Stream<FilterTestParameter<RoomRequestDto>> templateFilterExamples() {
+        final RoomRequestDto findThis = new RoomRequestDto().name("templateFilterExamples-findThis");
+        final RoomRequestDto notToBeFound = new RoomRequestDto().name("templateFilterExamples-notToBeFound");
+        return Stream.of(
+                new FilterTestParameter<>("filter by exact name", RoomRequestDto::getName, findThis, notToBeFound),
+                new FilterTestParameter<>("filter by name fragment", room -> "findThis", findThis, notToBeFound));
     }
 
     @Override
@@ -91,9 +95,5 @@ class RoomIT extends AbstractCrudIT<RoomRequestDto, RoomResponseDto, ListRoom200
     Stream<EditTestParameter<RoomRequestDto>> templateUpdateModifications() {
         return Stream.of(
                 new EditTestParameter<>("change name", dto -> dto.setName("%s-updated".formatted(dto.getName()))));
-    }
-
-    private AssertionError unsupported(final String methodName) {
-        return new AssertionError(methodName + " is not implemented for the current RoomIT subset.");
     }
 }

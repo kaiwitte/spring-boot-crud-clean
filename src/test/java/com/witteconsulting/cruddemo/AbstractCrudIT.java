@@ -54,10 +54,12 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     private TestRestTemplate restTemplate;
 
     /**
-     * This parameter is used for tests related to search.
+     * This parameter is used for tests related to search. Both requests are created
+     * before searching; the search term derived from {@code requestFound} must match
+     * only the entity created from it.
      */
-    record FilterTestParameter<TResponse>(
-            String name, Function<TResponse, String> searchTerm, TResponse expectedFound, TResponse expectedNotFound) {}
+    record FilterTestParameter<TRequest>(
+            String name, Function<TRequest, String> searchTerm, TRequest requestFound, TRequest requestNotFound) {}
 
     /**
      * This parameter defines a modification to existing
@@ -112,7 +114,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     /**
      * Search parameters for {@link #shouldFilterBySearchStringFactory()}
      */
-    abstract Stream<FilterTestParameter<TResponse>> templateFilterExamples();
+    abstract Stream<FilterTestParameter<TRequest>> templateFilterExamples();
 
     /**
      * Define how to create a new request from a received response in order
@@ -432,7 +434,6 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
      * Subclasses define in #templateFilterExamples() which specific searches need to be
      * tested and what expected results would be.
      */
-    @Disabled("Enable when filtering is supported.")
     @TestFactory
     Stream<DynamicTest> shouldFilterBySearchStringFactory() {
         return templateFilterExamples()
@@ -443,11 +444,20 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     /**
      * @see #shouldFilterBySearchStringFactory()
      */
-    private void shouldFilterBySearchString(final FilterTestParameter<TResponse> filterTestParameter) {
+    private void shouldFilterBySearchString(final FilterTestParameter<TRequest> filterTestParameter) {
         // given
+        templateDeleteAllExisting();
+        final ResponseEntity<TResponse> foundCreateResponse =
+                restTemplate.postForEntity(endpoint, filterTestParameter.requestFound, responseClass);
+        final ResponseEntity<TResponse> notFoundCreateResponse =
+                restTemplate.postForEntity(endpoint, filterTestParameter.requestNotFound, responseClass);
+        assertThat(foundCreateResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(notFoundCreateResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        final TResponse expectedFound = foundCreateResponse.getBody();
+        assertThat(expectedFound).isNotNull();
 
         // when
-        final String searchTerm = filterTestParameter.searchTerm.apply(filterTestParameter.expectedFound);
+        final String searchTerm = filterTestParameter.searchTerm.apply(filterTestParameter.requestFound);
         final ResponseEntity<TListResponse> listResponse =
                 restTemplate.getForEntity(endpoint + "?filter={searchString}", listClass, searchTerm);
 
@@ -457,10 +467,10 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(body).isNotNull();
         final List<TResponse> results = templateExtractResults(body);
         assertThat(results).isNotNull();
+        // containsExactly also asserts that the entity from requestNotFound is absent
         assertThat(results)
                 .usingRecursiveFieldByFieldElementComparatorIgnoringFields(templateComparisonIgnoredFields())
-                .containsExactly(filterTestParameter.expectedFound);
-        assertThat(results).doesNotContain(filterTestParameter.expectedNotFound);
+                .containsExactly(expectedFound);
     }
 
     /**

@@ -9,6 +9,7 @@ import com.witteconsulting.cruddemo.model.ListRoom200ResponseDto;
 import com.witteconsulting.cruddemo.model.RoomRequestDto;
 import com.witteconsulting.cruddemo.model.RoomResponseDto;
 import com.witteconsulting.cruddemo.repository.RoomRepository;
+import com.witteconsulting.cruddemo.repository.Search;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -75,7 +76,7 @@ public class RoomService implements RoomsApiDelegate {
 
     @Override
     public ResponseEntity<ListRoom200ResponseDto> listRoom(final String filter, final Pageable pageable) {
-        final Page<RoomEntity> pages = roomRepository.findAll((root, query, cb) -> cb.conjunction(), pageable);
+        final Page<RoomEntity> pages = roomRepository.findAll(Search.matchesSearch(filter, "name"), pageable);
         final List<RoomResponseDto> result =
                 pages.stream().map(RoomMapper.INSTANCE::entityToDto).toList();
 
