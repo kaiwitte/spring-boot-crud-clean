@@ -24,7 +24,7 @@ public class Search {
     private static <T> Optional<Predicate> getPredicate(
             final String search, final String searchField, final Root<T> root, final CriteriaBuilder cb) {
         final var fieldType = root.get(searchField).getModel().getBindableJavaType();
-        // add other types as needed, or the else branch will fail
+        // add other types as needed, or the else branch will fail. add to SearchTest as needed.
         if (fieldType.equals(Integer.class)) {
             return parseOptionalInteger(search).map(intSearch -> cb.equal(root.get(searchField), intSearch));
         } else {
