@@ -50,11 +50,11 @@ paths:
       - "room"
       summary: "Retrieve all Rooms"
       operationId: "listRoom"
+      x-spring-paginated: true
       parameters:
-      - $ref: "#/components/parameters/PageIndexParam"
-      - $ref: "#/components/parameters/PageSizeParam"
-      - $ref: "#/components/parameters/SortDirectionParam"
-      - $ref: "#/components/parameters/SortFieldParam"
+      - $ref: "#/components/parameters/PageParam"
+      - $ref: "#/components/parameters/SizeParam"
+      - $ref: "#/components/parameters/SortParam"
       - $ref: "#/components/parameters/FilterParam"
       responses:
         "200":
@@ -63,7 +63,7 @@ paths:
             application/json:
               schema:
                 type: "object"
-                requierd:
+                required:
                 - "results"
                 properties:
                   pagination:
@@ -142,36 +142,29 @@ components:
       schema:
         type: "string"
         format: "uuid"
-    PageIndexParam:
+    PageParam:
       in: "query"
-      description: "page nummer, starting with 0"
-      name: "pageIndex"
+      description: "page number, starting with 0"
+      name: "page"
       schema:
         type: "integer"
       required: false
-    PageSizeParam:
+    SizeParam:
       in: "query"
       description: "results per page"
-      name: "pageSize"
+      name: "size"
       schema:
         type: "integer"
       required: false
-    SortDirectionParam:
+    SortParam:
       in: "query"
-      description: "sort direction"
-      name: "sortDirection"
+      description: "sorting criteria in the format 'field,(asc|desc)'. Repeatable\
+        \ for multiple sort criteria."
+      name: "sort"
       schema:
-        type: "string"
-        enum:
-        - "ASC"
-        - "DESC"
-      required: false
-    SortFieldParam:
-      in: "query"
-      description: "name of field for sorting"
-      name: "sortField"
-      schema:
-        type: "string"
+        type: "array"
+        items:
+          type: "string"
       required: false
     FilterParam:
       in: "query"

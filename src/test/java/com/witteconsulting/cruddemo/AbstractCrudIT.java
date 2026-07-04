@@ -212,10 +212,11 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     }
 
     @Test
-    void shouldListAllWhenUnpaginated() {
+    void shouldListWithDefaultPagingWhenNoParams() {
         // given
-        final TRequest given1 = templateCreateValidRequest("shouldListAllWhenUnpaginated", 1);
-        final TRequest given2 = templateCreateValidRequest("shouldListAllWhenUnpaginated", 2);
+        templateDeleteAllExisting();
+        final TRequest given1 = templateCreateValidRequest("shouldListWithDefaultPagingWhenNoParams", 1);
+        final TRequest given2 = templateCreateValidRequest("shouldListWithDefaultPagingWhenNoParams", 2);
         final ResponseEntity<TResponse> createResponse1 = restTemplate.postForEntity(endpoint, given1, responseClass);
         final ResponseEntity<TResponse> createResponse2 = restTemplate.postForEntity(endpoint, given2, responseClass);
         final TResponse created1 = createResponse1.getBody();
@@ -262,13 +263,12 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         for (int pageIndex = 0; pageIndex < numExpectedPages; pageIndex++) {
             log.info("Fetching pageIndex {}", pageIndex);
             final ResponseEntity<TListResponse> responsePage = restTemplate.getForEntity(
-                    endpoint + "?" + "pageIndex={pageIndex}&pageSize={pageSize}"
-                            + "&sortDirection={sortDirection}&sortField={sortField}",
+                    endpoint + "?page={page}&size={size}&sort={sortField},{sortDirection}",
                     listClass,
                     pageIndex,
                     pageSize,
-                    sortDirection,
-                    sortField);
+                    sortField,
+                    sortDirection);
             assertThat(responsePage.getStatusCode()).isEqualTo(HttpStatus.OK);
 
             final TListResponse listResponse = responsePage.getBody();
@@ -316,8 +316,8 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         final int pageSize = 5;
 
         // when
-        final ResponseEntity<TListResponse> responsePage = restTemplate.getForEntity(
-                endpoint + "?pageIndex={pageIndex}&pageSize={pageSize}", listClass, pageIndex, pageSize);
+        final ResponseEntity<TListResponse> responsePage =
+                restTemplate.getForEntity(endpoint + "?page={page}&size={size}", listClass, pageIndex, pageSize);
 
         // then
         assertThat(responsePage.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -331,7 +331,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
 
         // when
         final ResponseEntity<TListResponse> responsePage = restTemplate.getForEntity(
-                endpoint + "?sortDirection={sortDirection}&sortField={sortField}", listClass, sortDirection, sortField);
+                endpoint + "?sort={sortField},{sortDirection}", listClass, sortField, sortDirection);
 
         // then
         assertThat(responsePage.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -345,20 +345,19 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
 
         // when
         final ResponseEntity<ApplicationErrorResponseDto> responsePage = restTemplate.getForEntity(
-                endpoint + "?" + "pageIndex={pageIndex}&pageSize={pageSize}"
-                        + "&sortDirection={sortDirection}&sortField={sortField}",
+                endpoint + "?page={page}&size={size}&sort={sortField},{sortDirection}",
                 ApplicationErrorResponseDto.class,
                 0,
                 1,
-                "ASC",
-                unknownField);
+                unknownField,
+                "ASC");
 
         // then
         assertThat(responsePage.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         final ApplicationErrorResponseDto body = responsePage.getBody();
         assertThat(body).isNotNull();
         assertThat(body.getErrorType()).isEqualTo(VALIDATION_ERROR);
-        assertThat(body.getFieldErrors().keySet()).containsExactly("sortField");
+        assertThat(body.getFieldErrors().keySet()).containsExactly("sort");
     }
 
     @Disabled("Enable when sorting validation is supported.")
@@ -369,39 +368,36 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
 
         // when
         final ResponseEntity<ApplicationErrorResponseDto> responsePage = restTemplate.getForEntity(
-                endpoint + "?" + "pageIndex={pageIndex}&pageSize={pageSize}"
-                        + "&sortDirection={sortDirection}&sortField={sortField}",
+                endpoint + "?page={page}&size={size}&sort={sortField},{sortDirection}",
                 ApplicationErrorResponseDto.class,
                 0,
                 1,
-                unknownDirection,
-                "name");
+                "name",
+                unknownDirection);
 
         // then
         assertThat(responsePage.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         final ApplicationErrorResponseDto body = responsePage.getBody();
         assertThat(body).isNotNull();
         assertThat(body.getErrorType()).isEqualTo(VALIDATION_ERROR);
-        assertThat(body.getFieldErrors().keySet()).containsExactly("sortDirection");
+        assertThat(body.getFieldErrors().keySet()).containsExactly("sort");
     }
 
-    @Disabled("Enable when pagination validation is supported.")
+    @Disabled("Spring's Pageable resolver clamps invalid page/size to valid values."
+            + " Enable if strict validation is added instead.")
     @ParameterizedTest
     @CsvSource({"0, 0", "0, -1", "-1, 1", "-1, -1"})
     void shouldShowErrorWhenInvalidPagination(final int pageIndex, final int pageSize) {
         // when
         final ResponseEntity<ApplicationErrorResponseDto> responsePage = restTemplate.getForEntity(
-                endpoint + "?pageIndex={pageIndex}&pageSize={pageSize}",
-                ApplicationErrorResponseDto.class,
-                pageIndex,
-                pageSize);
+                endpoint + "?page={page}&size={size}", ApplicationErrorResponseDto.class, pageIndex, pageSize);
         final ApplicationErrorResponseDto body = responsePage.getBody();
 
         // then
         assertThat(responsePage.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(body).isNotNull();
         assertThat(body.getErrorType()).isEqualTo(VALIDATION_ERROR);
-        assertThat(body.getFieldErrors().keySet()).containsAnyElementsOf(List.of("pageIndex", "pageSize"));
+        assertThat(body.getFieldErrors().keySet()).containsAnyElementsOf(List.of("page", "size"));
     }
 
     @Test

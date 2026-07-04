@@ -1,7 +1,5 @@
 package com.witteconsulting.cruddemo.service;
 
-import static com.witteconsulting.cruddemo.Util.pageable;
-
 import com.witteconsulting.cruddemo.api.RoomsApiDelegate;
 import com.witteconsulting.cruddemo.entity.RoomEntity;
 import com.witteconsulting.cruddemo.mapper.PaginationDtoMapper;
@@ -76,19 +74,10 @@ public class RoomService implements RoomsApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ListRoom200ResponseDto> listRoom(
-            final Integer pageIndex,
-            final Integer pageSize,
-            final String sortDirection,
-            final String sortField,
-            final String filter) {
-        final Pageable pageable = pageable(pageIndex, pageSize, sortDirection, sortField);
+    public ResponseEntity<ListRoom200ResponseDto> listRoom(final String filter, final Pageable pageable) {
         final Page<RoomEntity> pages = roomRepository.findAll((root, query, cb) -> cb.conjunction(), pageable);
         final List<RoomResponseDto> result =
                 pages.stream().map(RoomMapper.INSTANCE::entityToDto).toList();
-        //        final List<RoomResponseDto> result = roomRepository.findAll().stream()
-        //                .map(RoomMapper.INSTANCE::entityToDto)
-        //                .toList();
 
         return ResponseEntity.ok(new ListRoom200ResponseDto()
                 .pagination(PaginationDtoMapper.map(pages))

@@ -40,8 +40,8 @@ describe('App', () => {
 
     const request = httpTesting.expectOne((req) => req.url === 'http://localhost:8080/rooms');
     expect(request.request.method).toBe('GET');
-    expect(request.request.params.get('pageIndex')).toBe('0');
-    expect(request.request.params.get('pageSize')).toBe('10');
+    expect(request.request.params.get('page')).toBe('0');
+    expect(request.request.params.get('size')).toBe('10');
     request.flush({
       pagination: { total: 1, index: 0, size: 10 },
       results: [{ id: 'room-1', name: 'Blue Room' }],

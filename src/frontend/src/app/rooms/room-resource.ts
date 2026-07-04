@@ -19,13 +19,11 @@ export class RoomCrudResource implements CrudResource<RoomResponse, RoomRequest>
   }
 
   listPage(request: ServerPageRequest): Observable<ServerPageResponse<RoomResponse>> {
-    return this.roomService.listRoom(
-      request.pageIndex,
-      request.pageSize,
-      request.sortDirection,
-      request.sortField,
-      request.filter,
-    );
+    const sort =
+      request.sortField === undefined
+        ? undefined
+        : [`${request.sortField},${request.sortDirection ?? 'ASC'}`];
+    return this.roomService.listRoom(request.pageIndex, request.pageSize, sort, request.filter);
   }
 
   get(id: string): Observable<RoomResponse> {

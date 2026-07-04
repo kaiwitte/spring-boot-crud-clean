@@ -1,5 +1,5 @@
 import { firstValueFrom, of } from 'rxjs';
-import { instance, mock, verify, when } from 'ts-mockito';
+import { deepEqual, instance, mock, verify, when } from 'ts-mockito';
 
 import { RoomRequest, RoomResponse, RoomService } from '@generated';
 
@@ -30,7 +30,7 @@ describe('RoomCrudResource', () => {
   });
 
   it('delegates the paged list to the generated listRoom call', async () => {
-    when(roomService.listRoom(1, 5, 'ASC', 'name', 'blue')).thenReturn(
+    when(roomService.listRoom(1, 5, deepEqual(['name,ASC']), 'blue')).thenReturn(
       of({ pagination: { total: 7, index: 1, size: 5 }, results: [room] }),
     );
 
@@ -49,9 +49,7 @@ describe('RoomCrudResource', () => {
   });
 
   it('passes unset optional parameters to listRoom as undefined', async () => {
-    when(roomService.listRoom(0, 10, undefined, undefined, undefined)).thenReturn(
-      of({ results: [] }),
-    );
+    when(roomService.listRoom(0, 10, undefined, undefined)).thenReturn(of({ results: [] }));
 
     const response = await firstValueFrom(resource.listPage({ pageIndex: 0, pageSize: 10 }));
 
