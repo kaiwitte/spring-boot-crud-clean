@@ -9,6 +9,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("org.openapi.generator") version "7.14.0"
     id("com.diffplug.spotless") version "8.4.0"
+    id("info.solidsoft.pitest") version "1.19.0"
 }
 
 group = "com.witteconsulting"
@@ -222,6 +223,32 @@ tasks.named<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
 
 tasks.check {
     dependsOn(tasks.jacocoTestCoverageVerification)
+}
+
+// UNREVIEWED_AI_CODE
+pitest {
+    pitestVersion.set("1.25.5")
+    junit5PluginVersion.set("1.2.3")
+    testPlugin.set("junit5")
+
+    targetClasses.set(listOf("com.witteconsulting.cruddemo.*"))
+    targetTests.set(listOf("com.witteconsulting.cruddemo.*"))
+    excludedClasses.set(
+        listOf(
+            "com.witteconsulting.cruddemo.api.*",
+            "com.witteconsulting.cruddemo.model.*",
+            "com.witteconsulting.cruddemo.mapper.*MapperImpl*",
+            "com.witteconsulting.cruddemo.entity.*",
+            "com.witteconsulting.cruddemo.CruddemoApplication",
+            "com.witteconsulting.cruddemo.WebConfig",
+        ),
+    )
+
+    threads.set(Runtime.getRuntime().availableProcessors())
+    outputFormats.set(listOf("HTML", "XML"))
+    timestampedReports.set(false)
+
+    testStrengthThreshold.set(85)
 }
 
 springBoot {
