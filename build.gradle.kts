@@ -1,7 +1,10 @@
+import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification
+import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.5.4"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.openapi.generator") version "7.14.0"
@@ -20,6 +23,18 @@ java {
 repositories {
     mavenCentral()
 }
+
+jacoco {
+    toolVersion = "0.8.15"
+}
+
+val jacocoExcludedClassPatterns =
+    listOf(
+        "com/witteconsulting/cruddemo/api/**",
+        "com/witteconsulting/cruddemo/model/**",
+        "com/witteconsulting/cruddemo/mapper/*MapperImpl*",
+        "org/openapitools/**",
+    )
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -156,6 +171,57 @@ tasks.withType<Test> {
         showStandardStreams = true
         events("passed", "skipped", "failed")
     }
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.named<JacocoReport>("jacocoTestReport") {
+    dependsOn(tasks.test)
+
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+
+    classDirectories.setFrom(
+        sourceSets.main.get().output.asFileTree.matching {
+            exclude(jacocoExcludedClassPatterns)
+        },
+    )
+}
+
+tasks.named<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
+    dependsOn(tasks.test)
+
+    classDirectories.setFrom(
+        sourceSets.main.get().output.asFileTree.matching {
+            exclude(jacocoExcludedClassPatterns)
+        },
+    )
+
+    violationRules {
+        rule {
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.85".toBigDecimal()
+            }
+        }
+        rule {
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = "0.75".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
 }
 
 springBoot {

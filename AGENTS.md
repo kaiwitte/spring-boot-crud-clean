@@ -62,6 +62,11 @@ Only continue across layers without asking when the user's request clearly
 includes the end-to-end implementation, such as "make this test pass",
 "implement the feature", or "fix the failing endpoint".
 
+Also spotlessCheck is not required implicitly after editing files. spotlessApply
+is supposed to be set in IntelliJ IDEA as commit action anyway. Do not run
+implicit spotlessCheck and fix them manually. If necessary, use spotlessApply,
+e. g. when your job is to run all checks.
+
 ## Code style
 
 - all local variables final
