@@ -38,9 +38,14 @@ describe('App', () => {
     const httpTesting = TestBed.inject(HttpTestingController);
     await harness.fixture.whenStable();
 
-    const request = httpTesting.expectOne('http://localhost:8080/rooms');
+    const request = httpTesting.expectOne((req) => req.url === 'http://localhost:8080/rooms');
     expect(request.request.method).toBe('GET');
-    request.flush({ results: [{ id: 'room-1', name: 'Blue Room' }] });
+    expect(request.request.params.get('pageIndex')).toBe('0');
+    expect(request.request.params.get('pageSize')).toBe('10');
+    request.flush({
+      pagination: { total: 1, index: 0, size: 10 },
+      results: [{ id: 'room-1', name: 'Blue Room' }],
+    });
 
     await harness.fixture.whenStable();
     harness.detectChanges();

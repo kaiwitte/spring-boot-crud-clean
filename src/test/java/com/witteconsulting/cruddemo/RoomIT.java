@@ -5,15 +5,21 @@ import com.witteconsulting.cruddemo.model.PaginationDto;
 import com.witteconsulting.cruddemo.model.RoomRequestDto;
 import com.witteconsulting.cruddemo.model.RoomResponseDto;
 import com.witteconsulting.cruddemo.model.SortDto;
+import com.witteconsulting.cruddemo.repository.RoomRepository;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
+import org.springframework.beans.factory.annotation.Autowired;
 
 class RoomIT extends AbstractCrudIT<RoomRequestDto, RoomResponseDto, ListRoom200ResponseDto> {
 
-    RoomIT() {
+    private final RoomRepository roomRepository;
+
+    @Autowired
+    RoomIT(final RoomRepository roomRepository) {
         super(RoomResponseDto.class, ListRoom200ResponseDto.class, "/rooms");
+        this.roomRepository = roomRepository;
     }
 
     @Override
@@ -48,27 +54,27 @@ class RoomIT extends AbstractCrudIT<RoomRequestDto, RoomResponseDto, ListRoom200
 
     @Override
     void templateDeleteAllExisting() {
-        throw unsupported("templateDeleteAllExisting");
+        roomRepository.deleteAll();
     }
 
     @Override
     String templateSortField() {
-        throw unsupported("templateSortField");
+        return "name";
     }
 
     @Override
     PaginationDto templateExtractPagination(final ListRoom200ResponseDto listResponse) {
-        throw unsupported("templateExtractPagination");
+        return listResponse.getPagination();
     }
 
     @Override
     SortDto templateExtractSort(final ListRoom200ResponseDto listResponse) {
-        throw unsupported("templateExtractSort");
+        return listResponse.getSort();
     }
 
     @Override
     Comparator<RoomResponseDto> templateSortComparator() {
-        throw unsupported("templateSortComparator");
+        return Comparator.comparing(RoomResponseDto::getName);
     }
 
     @Override

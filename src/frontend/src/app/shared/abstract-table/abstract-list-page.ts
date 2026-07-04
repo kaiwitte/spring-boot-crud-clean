@@ -2,10 +2,26 @@ import { Directive, inject, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { DeleteFlowService } from '../abstract-delete-dialog/delete-flow.service';
-import { injectCrudResource } from '../crud/crud-resource';
+import { CrudResource, injectCrudResource } from '../crud/crud-resource';
 import { AbstractTableComponent } from './abstract-table.component';
 import { ClientSideTableProvider } from './client-side-table-provider';
+import { ServerSideTableProvider } from './server-side-table-provider';
 import { TableColumn, TableDataProvider, TableRowAction } from './table-model';
+
+/**
+ * Prefers server-side paging, sorting and filtering when the resource
+ * implements listPage; otherwise resolves queries client-side on the
+ * full list() result.
+ */
+export function tableProviderFor<TResponse, TRequest>(
+  resource: CrudResource<TResponse, TRequest>,
+  columns: readonly TableColumn<TResponse>[],
+): TableDataProvider<TResponse> {
+  const listPage = resource.listPage?.bind(resource);
+  return listPage === undefined
+    ? new ClientSideTableProvider<TResponse>(() => resource.list(), columns)
+    : new ServerSideTableProvider<TResponse>(listPage);
+}
 
 /**
  * Base workflow for list pages: wires the route-provided CrudResource into
@@ -43,10 +59,7 @@ export abstract class AbstractListPageComponent<TResponse, TRequest> {
 
   /** Lazy so subclass column initializers have run before first access. */
   protected get provider(): TableDataProvider<TResponse> {
-    this.providerCache ??= new ClientSideTableProvider<TResponse>(
-      () => this.config.resource.list(),
-      this.columns,
-    );
+    this.providerCache ??= tableProviderFor(this.config.resource, this.columns);
     return this.providerCache;
   }
 

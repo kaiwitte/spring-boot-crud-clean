@@ -1,8 +1,12 @@
 package com.witteconsulting.cruddemo.service;
 
+import static com.witteconsulting.cruddemo.Util.pageable;
+
 import com.witteconsulting.cruddemo.api.RoomsApiDelegate;
 import com.witteconsulting.cruddemo.entity.RoomEntity;
+import com.witteconsulting.cruddemo.mapper.PaginationDtoMapper;
 import com.witteconsulting.cruddemo.mapper.RoomMapper;
+import com.witteconsulting.cruddemo.mapper.SortDtoMapper;
 import com.witteconsulting.cruddemo.model.ListRoom200ResponseDto;
 import com.witteconsulting.cruddemo.model.RoomRequestDto;
 import com.witteconsulting.cruddemo.model.RoomResponseDto;
@@ -11,6 +15,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -70,11 +76,23 @@ public class RoomService implements RoomsApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ListRoom200ResponseDto> listRoom() {
-        final List<RoomResponseDto> result = roomRepository.findAll().stream()
-                .map(RoomMapper.INSTANCE::entityToDto)
-                .toList();
+    public ResponseEntity<ListRoom200ResponseDto> listRoom(
+            final Integer pageIndex,
+            final Integer pageSize,
+            final String sortDirection,
+            final String sortField,
+            final String filter) {
+        final Pageable pageable = pageable(pageIndex, pageSize, sortDirection, sortField);
+        final Page<RoomEntity> pages = roomRepository.findAll((root, query, cb) -> cb.conjunction(), pageable);
+        final List<RoomResponseDto> result =
+                pages.stream().map(RoomMapper.INSTANCE::entityToDto).toList();
+        //        final List<RoomResponseDto> result = roomRepository.findAll().stream()
+        //                .map(RoomMapper.INSTANCE::entityToDto)
+        //                .toList();
 
-        return ResponseEntity.ok(new ListRoom200ResponseDto().results(result));
+        return ResponseEntity.ok(new ListRoom200ResponseDto()
+                .pagination(PaginationDtoMapper.map(pages))
+                .sort(SortDtoMapper.map(pages))
+                .results(result));
     }
 }

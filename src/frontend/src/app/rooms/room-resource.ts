@@ -3,6 +3,7 @@ import { Observable, map } from 'rxjs';
 
 import { RoomRequest, RoomResponse, RoomService } from '@generated';
 
+import { ServerPageRequest, ServerPageResponse } from '../shared/abstract-table/table-model';
 import {
   CrudResource,
   CrudResourceConfig,
@@ -15,6 +16,16 @@ export class RoomCrudResource implements CrudResource<RoomResponse, RoomRequest>
 
   list(): Observable<readonly RoomResponse[]> {
     return this.roomService.listRoom().pipe(map((response) => response.results ?? []));
+  }
+
+  listPage(request: ServerPageRequest): Observable<ServerPageResponse<RoomResponse>> {
+    return this.roomService.listRoom(
+      request.pageIndex,
+      request.pageSize,
+      request.sortDirection,
+      request.sortField,
+      request.filter,
+    );
   }
 
   get(id: string): Observable<RoomResponse> {

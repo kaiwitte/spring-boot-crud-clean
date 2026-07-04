@@ -50,6 +50,12 @@ paths:
       - "room"
       summary: "Retrieve all Rooms"
       operationId: "listRoom"
+      parameters:
+      - $ref: "#/components/parameters/PageIndexParam"
+      - $ref: "#/components/parameters/PageSizeParam"
+      - $ref: "#/components/parameters/SortDirectionParam"
+      - $ref: "#/components/parameters/SortFieldParam"
+      - $ref: "#/components/parameters/FilterParam"
       responses:
         "200":
           description: "Ok"
@@ -57,7 +63,13 @@ paths:
             application/json:
               schema:
                 type: "object"
+                requierd:
+                - "results"
                 properties:
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  sort:
+                    $ref: "#/components/schemas/Sort"
                   results:
                     type: "array"
                     items:
@@ -130,6 +142,44 @@ components:
       schema:
         type: "string"
         format: "uuid"
+    PageIndexParam:
+      in: "query"
+      description: "page nummer, starting with 0"
+      name: "pageIndex"
+      schema:
+        type: "integer"
+      required: false
+    PageSizeParam:
+      in: "query"
+      description: "results per page"
+      name: "pageSize"
+      schema:
+        type: "integer"
+      required: false
+    SortDirectionParam:
+      in: "query"
+      description: "sort direction"
+      name: "sortDirection"
+      schema:
+        type: "string"
+        enum:
+        - "ASC"
+        - "DESC"
+      required: false
+    SortFieldParam:
+      in: "query"
+      description: "name of field for sorting"
+      name: "sortField"
+      schema:
+        type: "string"
+      required: false
+    FilterParam:
+      in: "query"
+      description: "search value"
+      name: "filter"
+      schema:
+        type: "string"
+      required: false
   schemas:
     Pagination:
       discriminator:
@@ -147,7 +197,7 @@ components:
           type: "number"
         has_next:
           type: "boolean"
-        has_prev:
+        has_previous:
           type: "boolean"
     Sort:
       type: "object"

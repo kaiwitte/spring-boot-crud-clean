@@ -23,11 +23,26 @@ export interface TablePage<T> {
 
 /**
  * Generic table service contract. Implementations may resolve the query
- * client-side (see ClientSideTableProvider) or delegate paging/sorting to
- * the server once the generated API exposes those parameters.
+ * client-side (see ClientSideTableProvider) or delegate paging, sorting
+ * and filtering to the server (see ServerSideTableProvider).
  */
 export interface TableDataProvider<T> {
   fetch(query: TableQuery): Observable<TablePage<T>>;
+}
+
+/** Query parameters as generated list endpoints with server-side paging expect them. */
+export interface ServerPageRequest {
+  readonly pageIndex: number;
+  readonly pageSize: number;
+  readonly sortDirection?: 'ASC' | 'DESC';
+  readonly sortField?: string;
+  readonly filter?: string;
+}
+
+/** Structural subset of generated list responses (e.g. ListRoom200Response). */
+export interface ServerPageResponse<T> {
+  readonly pagination?: { readonly total: number };
+  readonly results?: readonly T[];
 }
 
 export type TableCellValue = string | number | boolean | null | undefined;

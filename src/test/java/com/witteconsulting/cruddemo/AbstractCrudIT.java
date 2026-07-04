@@ -240,7 +240,6 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     /**
      * Stores 10 Items, then fetches them in 4 pages of 3, and verifies the results.
      */
-    @Disabled("Enable when pagination and sorting are supported.")
     @ParameterizedTest
     @CsvSource({"ASC", "DESC"})
     void shouldListAllPaginatedAndSorted(final String sortDirection) {
@@ -280,7 +279,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
             assertThat(pagination.getTotal()).isEqualTo(BigDecimal.valueOf(numGivenDtos));
             assertThat(pagination.getIndex()).isEqualTo(BigDecimal.valueOf(pageIndex));
             assertThat(pagination.getHasNext()).isEqualTo(pageIndex != 3);
-            assertThat(pagination.getHasPrev()).isEqualTo(pageIndex != 0);
+            assertThat(pagination.getHasPrevious()).isEqualTo(pageIndex != 0);
             assertThat(pagination.getSize()).isEqualTo(BigDecimal.valueOf(pageSize));
 
             final SortDto sort = templateExtractSort(listResponse);
@@ -310,7 +309,6 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
                 .containsExactly(expectedCombinedResults.toArray());
     }
 
-    @Disabled("Enable when pagination is supported.")
     @Test
     void shouldAllowPageWithoutSort() {
         // given
@@ -325,7 +323,6 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(responsePage.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
-    @Disabled("Enable when sorting is supported.")
     @Test
     void shouldAllowSortWithoutPage() {
         // given

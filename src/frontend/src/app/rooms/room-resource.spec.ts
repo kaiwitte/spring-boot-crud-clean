@@ -29,6 +29,35 @@ describe('RoomCrudResource', () => {
     await expect(firstValueFrom(resource.list())).resolves.toEqual([]);
   });
 
+  it('delegates the paged list to the generated listRoom call', async () => {
+    when(roomService.listRoom(1, 5, 'ASC', 'name', 'blue')).thenReturn(
+      of({ pagination: { total: 7, index: 1, size: 5 }, results: [room] }),
+    );
+
+    const response = await firstValueFrom(
+      resource.listPage({
+        pageIndex: 1,
+        pageSize: 5,
+        sortDirection: 'ASC',
+        sortField: 'name',
+        filter: 'blue',
+      }),
+    );
+
+    expect(response.results).toEqual([room]);
+    expect(response.pagination?.total).toBe(7);
+  });
+
+  it('passes unset optional parameters to listRoom as undefined', async () => {
+    when(roomService.listRoom(0, 10, undefined, undefined, undefined)).thenReturn(
+      of({ results: [] }),
+    );
+
+    const response = await firstValueFrom(resource.listPage({ pageIndex: 0, pageSize: 10 }));
+
+    expect(response.results).toEqual([]);
+  });
+
   it('delegates get to the generated getRoom call', async () => {
     when(roomService.getRoom('room-1')).thenReturn(of(room));
 

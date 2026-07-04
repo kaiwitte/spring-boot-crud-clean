@@ -1,6 +1,8 @@
 import { InjectionToken, Provider, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
+import { ServerPageRequest, ServerPageResponse } from '../abstract-table/table-model';
+
 /**
  * Contract every concrete model feature fulfils by adapting its generated
  * OpenAPI service. The generated request/response DTOs stay the source of
@@ -9,6 +11,11 @@ import { Observable } from 'rxjs';
  */
 export interface CrudResource<TResponse, TRequest, TId = string> {
   list(): Observable<readonly TResponse[]>;
+  /**
+   * Server-side paged, sorted and filtered list. When implemented, list
+   * pages prefer it over paging the full list() result client-side.
+   */
+  listPage?(request: ServerPageRequest): Observable<ServerPageResponse<TResponse>>;
   get(id: TId): Observable<TResponse>;
   create(request: TRequest): Observable<TResponse>;
   update(id: TId, request: TRequest): Observable<TResponse>;
