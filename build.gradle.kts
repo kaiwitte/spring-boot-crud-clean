@@ -248,7 +248,7 @@ pitest {
     outputFormats.set(listOf("HTML", "XML"))
     timestampedReports.set(false)
 
-    testStrengthThreshold.set(85)
+    testStrengthThreshold.set(95)
 }
 
 springBoot {

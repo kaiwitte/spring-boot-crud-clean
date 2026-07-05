@@ -1,12 +1,19 @@
 package com.witteconsulting.cruddemo.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.jpa.domain.Specification;
 
 @DataJpaTest
 class SearchTest {
@@ -28,6 +35,20 @@ class SearchTest {
         final List<SearchTestEntity> found = repository.findAll(Search.matchesSearch(null, "name"));
 
         assertThat(found).hasSize(3);
+    }
+
+    @Test
+    void shouldCreateConjunctionPredicateWhenSearchIsNull() {
+        final Specification<SearchTestEntity> specification = Search.matchesSearch(null, "name");
+        final Root<SearchTestEntity> root = mock();
+        final CriteriaQuery<?> query = mock();
+        final CriteriaBuilder criteriaBuilder = mock();
+        final Predicate conjunction = mock();
+        when(criteriaBuilder.conjunction()).thenReturn(conjunction);
+
+        final Predicate predicate = specification.toPredicate(root, query, criteriaBuilder);
+
+        assertThat(predicate).isSameAs(conjunction);
     }
 
     @Test
