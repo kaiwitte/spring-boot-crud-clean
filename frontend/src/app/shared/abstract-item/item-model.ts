@@ -6,8 +6,9 @@ export interface ItemField<T> {
   readonly value: (item: T) => ItemFieldValue;
 }
 
-/** Lifecycle of a route-loaded item, driving loading/not-found handling. */
+/** Lifecycle of a route-loaded item, driving loading/not-found/error handling. */
 export type ItemState<T> =
   | { readonly kind: 'loading' }
   | { readonly kind: 'not-found' }
+  | { readonly kind: 'error'; readonly message: string }
   | { readonly kind: 'loaded'; readonly item: T };

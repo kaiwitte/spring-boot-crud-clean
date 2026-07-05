@@ -99,3 +99,12 @@ e. g. when your job is to run all checks.
   compile, generate or similar, follow these rules:
     - keep the version of that library or dependency consistent within the project
     - use latest stable as a default
+
+## Understanding the project
+
+### Frontend/backend URL design
+
+- dev runs ng serve against http://localhost:8080 (CORS);
+- production builds use a relative API base path and assume frontend and API are served behind one origin.
+  Note: API paths currently collide with SPA routes (/rooms) — deployments must resolve this via an /api prefix
+  (decision pending / decided as X). Don't bake absolute backend URLs into images.

@@ -14,6 +14,16 @@
       </mat-card-actions>
     </mat-card>
   }
+  @case ('error') {
+    <mat-card>
+      <mat-card-content>
+        <p class="py-4 text-lg text-red-800" role="alert">{{ errorMessage() }}</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <a matButton [routerLink]="[...backLink()]">Back</a>
+      </mat-card-actions>
+    </mat-card>
+  }
   @default {
     <ng-content />
   }
