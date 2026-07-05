@@ -1,5 +1,8 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
+# Generated OpenAPI client (run ../gradlew openApiGenerateTypeScript to create)
+/src/generated
+
 # Compiled output
 /dist
 /tmp

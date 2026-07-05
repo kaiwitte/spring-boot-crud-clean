@@ -78,14 +78,19 @@ spotless {
     }
     yaml {
         target("**/*.yaml", "**/*.yml")
-        targetExclude("build/**/*.yaml", "build/**/*.yml")
+        targetExclude(
+            "build/**/*.yaml",
+            "build/**/*.yml",
+            "**/node_modules/**",
+        )
         jackson()
     }
     format("markdown") {
         target("**/*.md")
         targetExclude(
             "build/**/*.md",
-            "src/frontend/src/src/generated/**/*.md",
+            "frontend/src/generated/**/*.md",
+            "**/node_modules/**",
         )
         trimTrailingWhitespace()
         endWithNewline()
@@ -119,8 +124,7 @@ val openApiGenerateTypeScript =
     tasks.register<GenerateTask>("openApiGenerateTypeScript") {
         generatorName.set("typescript-angular")
         inputSpec.set(file("src/main/resources/cruddemo.yaml").toURI().toString())
-        // todo: more suitable output directory
-        outputDir.set(file("src/frontend/src/src/generated").absolutePath)
+        outputDir.set(file("frontend/src/generated").absolutePath)
         apiPackage.set("api")
         modelPackage.set("model")
         generateApiTests.set(false)

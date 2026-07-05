@@ -1,7 +1,7 @@
 import { firstValueFrom, of } from 'rxjs';
 import { deepEqual, instance, mock, verify, when } from 'ts-mockito';
 
-import { RoomRequest, RoomResponse, RoomService } from '@generated';
+import { ListRoom200Response, RoomRequest, RoomResponse, RoomService } from '@generated';
 
 import { RoomCrudResource, roomResourceConfig } from './room-resource';
 
@@ -24,7 +24,7 @@ describe('RoomCrudResource', () => {
   });
 
   it('lists an empty array when the generated response has no results', async () => {
-    when(roomService.listRoom()).thenReturn(of({}));
+    when(roomService.listRoom()).thenReturn(of({} as ListRoom200Response));
 
     await expect(firstValueFrom(resource.list())).resolves.toEqual([]);
   });
