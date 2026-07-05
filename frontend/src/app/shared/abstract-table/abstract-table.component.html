@@ -41,7 +41,7 @@
       }
 
       <table mat-table [dataSource]="rows()" matSort (matSortChange)="onSort($event)">
-        @for (column of columns(); track column.key) {
+        @for (column of columns(); track column.key; let isFirstColumn = $first) {
           <ng-container [matColumnDef]="column.key">
             <th
               mat-header-cell
@@ -51,7 +51,19 @@
             >
               {{ column.header }}
             </th>
-            <td mat-cell *matCellDef="let row">{{ column.value(row) }}</td>
+            <td mat-cell *matCellDef="let row">
+              @if (isFirstColumn && linkFor(row); as link) {
+                <a
+                  [routerLink]="[...link]"
+                  class="underline-offset-2 hover:underline focus:underline"
+                  (click)="$event.stopPropagation()"
+                >
+                  {{ column.value(row) }}
+                </a>
+              } @else {
+                {{ column.value(row) }}
+              }
+            </td>
           </ng-container>
         }
 

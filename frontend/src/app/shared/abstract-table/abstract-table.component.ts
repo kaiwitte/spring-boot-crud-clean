@@ -64,7 +64,10 @@ export class AbstractTableComponent<T> {
   readonly columns = input.required<readonly TableColumn<T>[]>();
   readonly provider = input.required<TableDataProvider<T>>();
   readonly actions = input<readonly TableRowAction<T>[]>([]);
-  /** Router commands for a row click, e.g. the detail view. */
+  /**
+   * Router commands for a row's target, e.g. the detail view. Renders the
+   * first column as a link (keyboard accessible) and makes rows clickable.
+   */
   readonly rowLink = input<((row: T) => readonly string[]) | null>(null);
   readonly createLink = input<readonly string[] | null>(null);
   readonly createLabel = input('New');
@@ -139,10 +142,15 @@ export class AbstractTableComponent<T> {
   }
 
   protected onRowClick(row: T): void {
-    const link = this.rowLink();
+    const link = this.linkFor(row);
     if (link !== null) {
-      void this.router.navigate([...link(row)]);
+      void this.router.navigate([...link]);
     }
+  }
+
+  protected linkFor(row: T): readonly string[] | null {
+    const link = this.rowLink();
+    return link === null ? null : link(row);
   }
 
   private updateQuery(patch: Partial<TableQuery>): void {
