@@ -125,6 +125,7 @@ val openApiGenerateTypeScript =
         generatorName.set("typescript-angular")
         inputSpec.set(file("src/main/resources/cruddemo.yaml").toURI().toString())
         outputDir.set(file("frontend/src/generated").absolutePath)
+        cleanupOutput.set(true)
         apiPackage.set("api")
         modelPackage.set("model")
         generateApiTests.set(false)
