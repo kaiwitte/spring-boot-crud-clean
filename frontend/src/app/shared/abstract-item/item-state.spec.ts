@@ -19,7 +19,7 @@ const notCalled = (): never => {
 
 const configWith = (get: () => Observable<TestItem>): CrudResourceConfig<TestItem, unknown> => ({
   resource: {
-    list: notCalled,
+    listPage: notCalled,
     get,
     create: notCalled,
     update: notCalled,

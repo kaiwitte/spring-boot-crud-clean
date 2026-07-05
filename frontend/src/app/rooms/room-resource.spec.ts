@@ -1,7 +1,7 @@
 import { firstValueFrom, of } from 'rxjs';
 import { deepEqual, instance, mock, verify, when } from 'ts-mockito';
 
-import { ListRoom200Response, RoomRequest, RoomResponse, RoomService } from '@generated';
+import { RoomRequest, RoomResponse, RoomService } from '@generated';
 
 import { RoomCrudResource, roomResourceConfig } from './room-resource';
 
@@ -15,18 +15,6 @@ describe('RoomCrudResource', () => {
   beforeEach(() => {
     roomService = mock(RoomService);
     resource = new RoomCrudResource(instance(roomService));
-  });
-
-  it('lists rooms by unwrapping the generated list response', async () => {
-    when(roomService.listRoom()).thenReturn(of({ results: [room] }));
-
-    await expect(firstValueFrom(resource.list())).resolves.toEqual([room]);
-  });
-
-  it('lists an empty array when the generated response has no results', async () => {
-    when(roomService.listRoom()).thenReturn(of({} as ListRoom200Response));
-
-    await expect(firstValueFrom(resource.list())).resolves.toEqual([]);
   });
 
   it('delegates the paged list to the generated listRoom call', async () => {

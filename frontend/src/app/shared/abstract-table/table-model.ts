@@ -22,9 +22,8 @@ export interface TablePage<T> {
 }
 
 /**
- * Generic table service contract. Implementations may resolve the query
- * client-side (see ClientSideTableProvider) or delegate paging, sorting
- * and filtering to the server (see ServerSideTableProvider).
+ * Generic table service contract, keeping the table component decoupled
+ * from the CRUD layer (see ServerSideTableProvider).
  */
 export interface TableDataProvider<T> {
   fetch(query: TableQuery): Observable<TablePage<T>>;

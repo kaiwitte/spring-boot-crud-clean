@@ -1,5 +1,5 @@
 import { Provider, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { RoomRequest, RoomResponse, RoomService } from '@generated';
 
@@ -13,10 +13,6 @@ import {
 /** Adapts the generated RoomService to the generic CrudResource contract. */
 export class RoomCrudResource implements CrudResource<RoomResponse, RoomRequest> {
   constructor(private readonly roomService: RoomService) {}
-
-  list(): Observable<readonly RoomResponse[]> {
-    return this.roomService.listRoom().pipe(map((response) => response.results ?? []));
-  }
 
   listPage(request: ServerPageRequest): Observable<ServerPageResponse<RoomResponse>> {
     const sort =

@@ -10,12 +10,8 @@ import { ServerPageRequest, ServerPageResponse } from '../abstract-table/table-m
  * abstract-* building blocks.
  */
 export interface CrudResource<TResponse, TRequest, TId = string> {
-  list(): Observable<readonly TResponse[]>;
-  /**
-   * Server-side paged, sorted and filtered list. When implemented, list
-   * pages prefer it over paging the full list() result client-side.
-   */
-  listPage?(request: ServerPageRequest): Observable<ServerPageResponse<TResponse>>;
+  /** Server-side paged, sorted and filtered list. */
+  listPage(request: ServerPageRequest): Observable<ServerPageResponse<TResponse>>;
   get(id: TId): Observable<TResponse>;
   create(request: TRequest): Observable<TResponse>;
   update(id: TId, request: TRequest): Observable<TResponse>;
