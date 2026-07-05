@@ -5,8 +5,11 @@ const angular = require('angular-eslint');
 
 module.exports = tseslint.config(
   {
+    // Generated OpenAPI client is not held to hand-written code rules.
+    ignores: ['src/generated/**'],
+  },
+  {
     files: ['**/*.ts'],
-    ignores: ['src/src/generated/**'],
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommended,

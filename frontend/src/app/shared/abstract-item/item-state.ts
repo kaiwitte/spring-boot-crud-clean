@@ -32,7 +32,9 @@ export function crudItemState<TResponse, TRequest>(
         return config.resource.get(id).pipe(
           map((item): ItemState<TResponse> => ({ kind: 'loaded', item })),
           startWith(loading),
-          catchError((error: unknown) => of(toFailureState<TResponse>(error, config.names.singular))),
+          catchError((error: unknown) =>
+            of(toFailureState<TResponse>(error, config.names.singular)),
+          ),
         );
       }),
     ),
