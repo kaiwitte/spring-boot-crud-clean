@@ -15,6 +15,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HelloResponse"
+        "500":
+          description: "Unexpected server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationErrorResponse"
   /rooms:
     post:
       tags:
@@ -41,6 +47,12 @@ paths:
                 $ref: "#/components/schemas/RoomResponse"
         "400":
           description: "Error in the request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationErrorResponse"
+        "500":
+          description: "Unexpected server error"
           content:
             application/json:
               schema:
@@ -74,6 +86,18 @@ paths:
                     type: "array"
                     items:
                       $ref: "#/components/schemas/RoomResponse"
+        "400":
+          description: "Error in the request, e.g. sorting by an unknown field"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationErrorResponse"
+        "500":
+          description: "Unexpected server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationErrorResponse"
   /rooms/{roomId}:
     parameters:
     - $ref: "#/components/parameters/IdParam"
@@ -91,6 +115,12 @@ paths:
                 $ref: "#/components/schemas/RoomResponse"
         "404":
           description: "No Room found with this RoomId"
+        "500":
+          description: "Unexpected server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationErrorResponse"
     put:
       tags:
       - "room"
@@ -117,6 +147,12 @@ paths:
                 $ref: "#/components/schemas/ApplicationErrorResponse"
         "404":
           description: "No Room found with this RoomId"
+        "500":
+          description: "Unexpected server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationErrorResponse"
     delete:
       tags:
       - "room"
@@ -133,6 +169,12 @@ paths:
                 $ref: "#/components/schemas/ApplicationErrorResponse"
         "404":
           description: "No Room found with this RoomId"
+        "500":
+          description: "Unexpected server error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationErrorResponse"
 components:
   parameters:
     IdParam:

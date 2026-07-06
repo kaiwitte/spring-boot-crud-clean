@@ -73,6 +73,30 @@ e. g. when your job is to run all checks.
 - as a loose rule, avoid string concatenation, use .formatted like: "%s-%d".formatted(methodName, enumerator)
   where it makes sense
 
+### Functional style
+
+Prefer a functional style over a sequence of instructions. Scope: Touched code. Exception: No nested
+Optionals, no lambdas with side effects, not when clearly hacky and harder to read.
+
+For example, instead of:
+```
+final String[] sortValues = request.getParameterValues("sort");
+if (sortValues == null) {
+    return false;
+}
+return Arrays.stream(sortValues)
+    .flatMap(value -> Arrays.stream(value.split(",")))
+    .anyMatch(propertyName::equals);
+```
+do:
+```
+return Optional.ofNullable(request.getParameterValues("sort"))
+    .stream()
+    .flatMap(Arrays::stream)
+    .flatMap(value -> Arrays.stream(value.split(",")))
+    .anyMatch(propertyName::equals);
+```
+
 ## Architecture, methods and technologies
 
 - OpenAPI generator
