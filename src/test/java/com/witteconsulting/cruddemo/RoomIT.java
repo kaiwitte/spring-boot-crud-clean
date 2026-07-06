@@ -28,13 +28,10 @@ class RoomIT extends AbstractCrudIT<RoomRequestDto, RoomResponseDto, ListRoom200
     }
 
     @Override
-    RoomRequestDto templateCreateInvalidRequest(final String methodName) {
-        return new RoomRequestDto().name(null);
-    }
-
-    @Override
-    String[] templateInvalidRequestFieldNames() {
-        return new String[] {"name"};
+    Stream<InvalidRequestTestParameter<RoomRequestDto>> templateInvalidRequestExamples() {
+        return Stream.of(
+                new InvalidRequestTestParameter<>("null name", new RoomRequestDto().name(null), new String[] {"name"}),
+                new InvalidRequestTestParameter<>("empty name", new RoomRequestDto().name(""), new String[] {"name"}));
     }
 
     @Override

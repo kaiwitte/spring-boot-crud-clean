@@ -68,6 +68,12 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
      */
     record EditTestParameter<TRequest>(String name, Consumer<TRequest> modification) {}
 
+    /**
+     * This parameter defines a request that must be rejected with a validation error,
+     * together with the names of the fields whose values are invalid.
+     */
+    record InvalidRequestTestParameter<TRequest>(String name, TRequest request, String[] expectedInvalidFieldNames) {}
+
     protected AbstractCrudIT(
             final Class<TResponse> responseClass, final Class<TListResponse> listClass, final String endpoint) {
         this.responseClass = responseClass;
@@ -86,15 +92,10 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     abstract TRequest templateCreateValidRequest(final String methodName, final int enumerator);
 
     /**
-     * Define how to create an instance that triggers a bean validation error.
+     * Invalid requests for {@link #shouldRespondBadRequestAndSpecificFieldsForInvalidFactory()}.
+     * Each example must trigger a bean validation error.
      */
-    abstract TRequest templateCreateInvalidRequest(final String methodName);
-
-    /**
-     * Companion method to {@link #templateCreateInvalidRequest(String)} which must return the names of the fields
-     * that have invalid values in that request.
-     */
-    abstract String[] templateInvalidRequestFieldNames();
+    abstract Stream<InvalidRequestTestParameter<TRequest>> templateInvalidRequestExamples();
 
     abstract UUID templateExtractId(TResponse dto);
 
@@ -192,15 +193,34 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
-    @Test
-    void shouldRespondBadRequestAndSpecificFieldsForNewInvalid() {
+    /**
+     * Generates one test per combination of invalid request example and HTTP method
+     * (POST and PUT) which asserts that the request is rejected with a validation error
+     * naming the invalid fields.
+     * Subclasses define the invalid requests in {@link #templateInvalidRequestExamples()}.
+     */
+    @TestFactory
+    Stream<DynamicTest> shouldRespondBadRequestAndSpecificFieldsForInvalidFactory() {
+        return templateInvalidRequestExamples().flatMap(parameter -> Stream.of(HttpMethod.POST, HttpMethod.PUT)
+                .map(method -> DynamicTest.dynamicTest(
+                        "%s (%s)".formatted(parameter.name, method),
+                        () -> shouldRespondBadRequestAndSpecificFieldsForInvalid(method, parameter))));
+    }
+
+    /**
+     * @see #shouldRespondBadRequestAndSpecificFieldsForInvalidFactory()
+     */
+    private void shouldRespondBadRequestAndSpecificFieldsForInvalid(
+            final HttpMethod method, final InvalidRequestTestParameter<TRequest> parameter) {
         // given
-        final TRequest givenRequest =
-                templateCreateInvalidRequest("shouldRespondBadRequestAndSpecificFieldsForNewInvalid");
+        // PUT needs an existing entity so the validation error is the only possible failure cause
+        final URI requestUri = method.equals(HttpMethod.PUT)
+                ? createEntity("shouldRespondBadRequestAndSpecificFieldsForInvalid")
+                : URI.create(endpoint);
 
         // when
-        final ResponseEntity<ApplicationErrorResponseDto> response =
-                restTemplate.postForEntity(endpoint, givenRequest, ApplicationErrorResponseDto.class);
+        final ResponseEntity<ApplicationErrorResponseDto> response = restTemplate.exchange(
+                requestUri, method, new HttpEntity<>(parameter.request), ApplicationErrorResponseDto.class);
 
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -208,9 +228,9 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         final ApplicationErrorResponseDto body = response.getBody();
         assertThat(body).isNotNull();
         final SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         softly.assertThat(body.getErrorType()).isEqualTo(VALIDATION_ERROR);
-        softly.assertThat(body.getFieldErrors().keySet()).containsExactlyInAnyOrder(templateInvalidRequestFieldNames());
+        softly.assertThat(body.getFieldErrors().keySet())
+                .containsExactlyInAnyOrder(parameter.expectedInvalidFieldNames);
         softly.assertAll();
     }
 
@@ -526,6 +546,16 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
                 .ignoringFields(templateComparisonIgnoredFields())
                 .isEqualTo(givenRequestBody);
         return actualResponseBody;
+    }
+
+    /**
+     * Create an entity from a valid request and return its location.
+     */
+    private URI createEntity(@SuppressWarnings("SameParameterValue") final String methodName) {
+        final ResponseEntity<TResponse> createResponse =
+                restTemplate.postForEntity(endpoint, templateCreateValidRequest(methodName, 0), responseClass);
+        assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        return Objects.requireNonNull(createResponse.getHeaders().getLocation());
     }
 
     private URI expectedUriForId(final UUID uuid) {
