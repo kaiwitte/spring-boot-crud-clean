@@ -264,6 +264,7 @@ components:
           description: "unique ID. Ignored in requests, required in responses"
         name:
           type: "string"
+          minLength: 1
       required:
       - "name"
     RoomRequest:
