@@ -103,11 +103,11 @@ return Optional.ofNullable(request.getParameterValues("sort"))
 - Integration tests
     - SpringBootTest
     - TestRestTemplate
-    - Tests for entities are named [Entityname]IT
+    - Planned: Tests for entities are named [Entityname]IT
     - There is a AbstractCrudIT class that provides common functionality
     - Implementing classes provide template method implementations for what is entity specific
-    - Testcontainers are used for Postgres and KeyCloak
-    - The possible future hierarchy for integration tests is:
+    - Planned: Testcontainers are used for Postgres and KeyCloak
+    - Planned: The possible future hierarchy for integration tests is:
         - AbstractTestContainersIT: Init and provide Testcontainers
             - AbstractRestIT: Provide the TestRestTemplates including possible authentication
                 - AbstractCrudIT: Provide common CRUD functionality

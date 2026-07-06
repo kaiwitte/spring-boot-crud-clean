@@ -26,13 +26,15 @@ public class RoomService implements RoomsApiDelegate {
 
     private final RoomRepository roomRepository;
 
+    private final RoomMapper roomMapper;
+
     @Override
     public ResponseEntity<RoomResponseDto> newRoom(final RoomRequestDto roomRequestDto) {
-        final RoomEntity entity = RoomMapper.INSTANCE.dtoToEntity(roomRequestDto);
+        final RoomEntity entity = roomMapper.dtoToEntity(roomRequestDto);
 
         final RoomEntity savedEntity = roomRepository.save(entity);
 
-        final RoomResponseDto response = RoomMapper.INSTANCE.entityToDto(savedEntity);
+        final RoomResponseDto response = roomMapper.entityToDto(savedEntity);
 
         final URI location = UriComponentsBuilder.fromPath("/rooms")
                 .pathSegment(savedEntity.getId().toString())
@@ -46,7 +48,7 @@ public class RoomService implements RoomsApiDelegate {
     public ResponseEntity<RoomResponseDto> getRoom(final UUID roomId) {
         return roomRepository
                 .findById(roomId)
-                .map(RoomMapper.INSTANCE::entityToDto)
+                .map(roomMapper::entityToDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -66,9 +68,9 @@ public class RoomService implements RoomsApiDelegate {
         return roomRepository
                 .findById(roomId)
                 .map(entity -> {
-                    RoomMapper.INSTANCE.updateEntityFromDto(roomRequestDto, entity);
+                    roomMapper.updateEntityFromDto(roomRequestDto, entity);
                     final RoomEntity savedEntity = roomRepository.save(entity);
-                    return RoomMapper.INSTANCE.entityToDto(savedEntity);
+                    return roomMapper.entityToDto(savedEntity);
                 })
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -78,7 +80,7 @@ public class RoomService implements RoomsApiDelegate {
     public ResponseEntity<ListRoom200ResponseDto> listRoom(final String filter, final Pageable pageable) {
         final Page<RoomEntity> pages = roomRepository.findAll(Search.matchesSearch(filter, "name"), pageable);
         final List<RoomResponseDto> result =
-                pages.stream().map(RoomMapper.INSTANCE::entityToDto).toList();
+                pages.stream().map(roomMapper::entityToDto).toList();
 
         return ResponseEntity.ok(new ListRoom200ResponseDto()
                 .pagination(PaginationDtoMapper.map(pages))

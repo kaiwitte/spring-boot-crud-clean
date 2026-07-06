@@ -23,7 +23,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
  * <p>
  * One of the stronger arguments of the agent against my objection was that the PIT mutation tests would
  * be much faster with this test present, as they would realise that this test runs faster than the IT that also
- * cover the same lines. Something I would not have known, by the way, nor had the time to read into it in
+ * cover the same lines. Something I would not have known, by the way, nor had the time to read into in
  * this detail.
  * <p>
  * But since this project is for discussion and learning, I'll leave it in.

@@ -7,12 +7,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface RoomMapper {
-
-    RoomMapper INSTANCE = Mappers.getMapper(RoomMapper.class);
 
     RoomEntity dtoToEntity(RoomRequestDto dto);
 

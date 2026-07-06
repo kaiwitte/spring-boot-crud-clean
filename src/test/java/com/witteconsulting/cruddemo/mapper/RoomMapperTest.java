@@ -7,8 +7,12 @@ import com.witteconsulting.cruddemo.model.RoomRequestDto;
 import com.witteconsulting.cruddemo.model.RoomResponseDto;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
 class RoomMapperTest {
+
+    private final RoomMapper roomMapper = Mappers.getMapper(RoomMapper.class);
+
     @Test
     void shouldMapDtoToEntity() {
         // Given
@@ -16,7 +20,7 @@ class RoomMapperTest {
         dto.setName("Conference Room");
 
         // When
-        final RoomEntity entity = RoomMapper.INSTANCE.dtoToEntity(dto);
+        final RoomEntity entity = roomMapper.dtoToEntity(dto);
 
         // Then
         assertThat(entity).isNotNull();
@@ -31,7 +35,7 @@ class RoomMapperTest {
         final RoomEntity entity = RoomEntity.builder().id(id).name("Board Room").build();
 
         // When
-        final RoomResponseDto dto = RoomMapper.INSTANCE.entityToDto(entity);
+        final RoomResponseDto dto = roomMapper.entityToDto(entity);
 
         // Then
         assertThat(dto).isNotNull();
@@ -49,7 +53,7 @@ class RoomMapperTest {
         updateRequestDto.setName("Updated Room");
 
         // When
-        RoomMapper.INSTANCE.updateEntityFromDto(updateRequestDto, originalEntity);
+        roomMapper.updateEntityFromDto(updateRequestDto, originalEntity);
 
         // Then
         assertThat(originalEntity.getName()).isEqualTo("Updated Room");
@@ -67,7 +71,7 @@ class RoomMapperTest {
         updateRequestDto.setName("Updated Room");
 
         // When
-        RoomMapper.INSTANCE.updateEntityFromDto(updateRequestDto, entity);
+        roomMapper.updateEntityFromDto(updateRequestDto, entity);
 
         // Then
         assertThat(entity.getId()).isEqualTo(existingId);
