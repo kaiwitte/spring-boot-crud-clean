@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -402,14 +403,19 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(body.getFieldErrors().keySet()).containsAnyElementsOf(List.of("page", "size"));
     }
 
-    @Test
-    void shouldReturn404ForNonExistentId() {
+    @ParameterizedTest
+    @ValueSource(strings = {"GET", "PUT", "DELETE"})
+    void shouldReturn404ForNonExistentId(final HttpMethod method) {
         // given
         final UUID nonExistentId = UUID.randomUUID();
+        // PUT needs a valid body to reach the id lookup instead of failing validation
+        final HttpEntity<?> requestEntity = method.equals(HttpMethod.PUT)
+                ? new HttpEntity<>(templateCreateValidRequest("shouldReturn404ForNonExistentId", 1))
+                : HttpEntity.EMPTY;
 
         // when
         final ResponseEntity<String> serverResponse =
-                restTemplate.getForEntity(idEndpoint, String.class, nonExistentId);
+                restTemplate.exchange(idEndpoint, method, requestEntity, String.class, nonExistentId);
 
         // then
         assertThat(serverResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
