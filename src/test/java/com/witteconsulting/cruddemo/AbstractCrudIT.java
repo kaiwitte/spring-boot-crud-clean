@@ -43,7 +43,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @param <TRequest>      the Dto class
  * @param <TListResponse> the Dto-List-class
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Slf4j
 abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     private final Class<TResponse> responseClass;
@@ -340,7 +340,6 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(responsePage.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
-    @Disabled("Enable when sorting validation is supported.")
     @Test
     void shouldShowErrorWhenSortingByUnknownField() {
         // given
@@ -363,7 +362,6 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
         assertThat(body.getFieldErrors().keySet()).containsExactly("sort");
     }
 
-    @Disabled("Enable when sorting validation is supported.")
     @Test
     void shouldShowErrorWhenSortingByUnknownDirection() {
         // given
