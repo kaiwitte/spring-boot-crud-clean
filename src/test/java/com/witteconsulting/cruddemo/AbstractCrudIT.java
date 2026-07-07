@@ -1,5 +1,6 @@
 package com.witteconsulting.cruddemo;
 
+import static com.witteconsulting.cruddemo.TestUtil.allCombinations;
 import static com.witteconsulting.cruddemo.model.ApplicationErrorResponseDto.ErrorTypeEnum.VALIDATION_ERROR;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,6 +10,7 @@ import com.witteconsulting.cruddemo.model.SortDto;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -96,7 +98,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
      * Invalid requests for {@link #shouldRespondBadRequestAndSpecificFieldsForInvalidFactory()}.
      * Each example must trigger a bean validation error.
      */
-    abstract Stream<InvalidRequestTestParameter<TRequest>> templateInvalidRequestExamples();
+    abstract Collection<InvalidRequestTestParameter<TRequest>> templateInvalidRequestExamples();
 
     abstract UUID templateExtractId(TResponse dto);
 
@@ -117,7 +119,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     /**
      * Search parameters for {@link #shouldFilterBySearchStringFactory()}
      */
-    abstract Stream<FilterTestParameter<TRequest>> templateFilterExamples();
+    abstract Collection<FilterTestParameter<TRequest>> templateFilterExamples();
 
     /**
      * Define how to create a new request from a received response in order
@@ -202,11 +204,11 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
      */
     @TestFactory
     Stream<DynamicTest> shouldRespondBadRequestAndSpecificFieldsForInvalidFactory() {
-        return templateInvalidRequestExamples().flatMap(parameter -> Stream.of(HttpMethod.POST, HttpMethod.PUT)
-                .map(method -> dynamicTest(method, parameter)));
+        return allCombinations(
+                List.of(HttpMethod.POST, HttpMethod.PUT), templateInvalidRequestExamples(), this::createDynamicTest);
     }
 
-    private @NonNull DynamicTest dynamicTest(
+    private @NonNull DynamicTest createDynamicTest(
             final HttpMethod method, final InvalidRequestTestParameter<TRequest> parameter) {
         return DynamicTest.dynamicTest(
                 "%s (%s)".formatted(parameter.name, method),
@@ -466,7 +468,7 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
      */
     @TestFactory
     Stream<DynamicTest> shouldFilterBySearchStringFactory() {
-        return templateFilterExamples()
+        return templateFilterExamples().stream()
                 .map(filterTestParameter -> DynamicTest.dynamicTest(
                         filterTestParameter.name, () -> shouldFilterBySearchString(filterTestParameter)));
     }

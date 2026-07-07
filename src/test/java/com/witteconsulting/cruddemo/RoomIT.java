@@ -6,6 +6,7 @@ import com.witteconsulting.cruddemo.model.RoomRequestDto;
 import com.witteconsulting.cruddemo.model.RoomResponseDto;
 import com.witteconsulting.cruddemo.model.SortDto;
 import com.witteconsulting.cruddemo.repository.RoomRepository;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -28,8 +29,8 @@ class RoomIT extends AbstractCrudIT<RoomRequestDto, RoomResponseDto, ListRoom200
     }
 
     @Override
-    Stream<InvalidRequestTestParameter<RoomRequestDto>> templateInvalidRequestExamples() {
-        return Stream.of(
+    Collection<InvalidRequestTestParameter<RoomRequestDto>> templateInvalidRequestExamples() {
+        return List.of(
                 new InvalidRequestTestParameter<>("null name", new RoomRequestDto().name(null), new String[] {"name"}),
                 new InvalidRequestTestParameter<>("empty name", new RoomRequestDto().name(""), new String[] {"name"}));
     }
@@ -75,10 +76,10 @@ class RoomIT extends AbstractCrudIT<RoomRequestDto, RoomResponseDto, ListRoom200
     }
 
     @Override
-    Stream<FilterTestParameter<RoomRequestDto>> templateFilterExamples() {
+    Collection<FilterTestParameter<RoomRequestDto>> templateFilterExamples() {
         final RoomRequestDto findThis = new RoomRequestDto().name("templateFilterExamples-findThis");
         final RoomRequestDto notToBeFound = new RoomRequestDto().name("templateFilterExamples-notToBeFound");
-        return Stream.of(
+        return List.of(
                 new FilterTestParameter<>("filter by exact name", RoomRequestDto::getName, findThis, notToBeFound),
                 new FilterTestParameter<>("filter by name fragment", room -> "findThis", findThis, notToBeFound));
     }
