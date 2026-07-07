@@ -18,6 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.SoftAssertions;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
@@ -202,9 +203,14 @@ abstract class AbstractCrudIT<TRequest, TResponse, TListResponse> {
     @TestFactory
     Stream<DynamicTest> shouldRespondBadRequestAndSpecificFieldsForInvalidFactory() {
         return templateInvalidRequestExamples().flatMap(parameter -> Stream.of(HttpMethod.POST, HttpMethod.PUT)
-                .map(method -> DynamicTest.dynamicTest(
-                        "%s (%s)".formatted(parameter.name, method),
-                        () -> shouldRespondBadRequestAndSpecificFieldsForInvalid(method, parameter))));
+                .map(method -> dynamicTest(method, parameter)));
+    }
+
+    private @NonNull DynamicTest dynamicTest(
+            final HttpMethod method, final InvalidRequestTestParameter<TRequest> parameter) {
+        return DynamicTest.dynamicTest(
+                "%s (%s)".formatted(parameter.name, method),
+                () -> shouldRespondBadRequestAndSpecificFieldsForInvalid(method, parameter));
     }
 
     /**
